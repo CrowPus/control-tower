@@ -55,3 +55,6 @@ secrets/
 
 # Backups (scripts/backup.sh): they hold the database and a copy of .env
 backups/
+
+# A machine's own compose settings (networks, memory caps)
+docker-compose.override.yml
