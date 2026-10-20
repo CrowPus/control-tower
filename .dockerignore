@@ -1,0 +1,36 @@
+# Dependencies and build output — rebuilt inside the image
+node_modules
+dist
+**/.venv
+.uv-cache
+
+# Python and tooling caches
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.coverage
+htmlcov
+
+# Secrets and runtime state — never in an image
+**/.env
+!**/.env.example
+.runtime-data
+tls
+
+# Version control
+.git
+.github
+
+# Documentation and planning: not needed at runtime. docs/model* alone is
+docs
+*.md
+!README.md
+# The admin's own documentation is part of the app (Admin → Docs, and what Nia reads).
+!backend/app/admin_docs/*.md
+
+# Test and tooling artefacts
+.playwright
+playwright-report
+test-results
+

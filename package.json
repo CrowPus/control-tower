@@ -1,0 +1,50 @@
+{
+  "name": "control-tower",
+  "version": "0.1.0",
+  "description": "Control Tower: a self-hosted admin and AI-agent office for founders.",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrowPus/control-tower.git"
+  },
+  "homepage": "https://github.com/CrowPus/control-tower#readme",
+  "bugs": {
+    "url": "https://github.com/CrowPus/control-tower/issues"
+  },
+  "scripts": {
+    "dev": "vite --config vite.admin.config.ts",
+    "build": "tsc -p tsconfig.json --noEmit && vite build --config vite.admin.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "api": "uv run --directory backend --locked python -m app.admin_openapi && openapi-typescript admin/openapi.json -o admin/src/schema.d.ts"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.8.0",
+    "@tanstack/react-query": "^5.103.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
+    "openapi-fetch": "^0.15.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-force-graph-2d": "1.29.1",
+    "react-router-dom": "^7.18.4",
+    "tailwind-merge": "^2.6.0",
+    "three": "0.186.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/three": "0.186.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "openapi-typescript": "^7.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5"
+  },
+  "overrides": {
+    "force-graph": "1.51.4",
+    "@babel/runtime": "7.29.7"
+  }
+}

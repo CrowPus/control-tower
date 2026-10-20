@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* Control Tower's design tokens: runtime variables so light and dark are both real themes; Tailwind utilities reference
+   them through @theme inline. The primary colour is the tower's cyan (brand/mark.svg). */
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-raised: #f4f4f5;
+  --surface-overlay: #ffffff;
+  --border: #e4e4e7;
+  --border-strong: #d4d4d8;
+  --fg: #18181b;
+  --fg-muted: #52525b;
+  --fg-subtle: #8b8b94;
+  --primary: #0e7490;
+  --primary-hover: #155e75;
+  --primary-fg: #ffffff;
+  --primary-soft: #ecfeff;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --info: #0369a1;
+  --info-soft: #e0f2fe;
+  --focus-ring: rgba(14, 116, 144, 0.45);
+  --shadow: 0 8px 24px rgba(24, 24, 27, 0.12);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #010102;
+  --surface: #0f1011;
+  --surface-raised: #141516;
+  --surface-overlay: #191a1b;
+  --border: #23252a;
+  --border-strong: #34343a;
+  --fg: #f7f8f8;
+  --fg-muted: #8a8f98;
+  --fg-subtle: #62666d;
+  /* A lighter cyan on dark, readable as text; buttons carry dark text on it. */
+  --primary: #22d3ee;
+  --primary-hover: #67e8f9;
+  --primary-fg: #04222a;
+  --primary-soft: rgba(34, 211, 238, 0.14);
+  --success: #3fbf5f;
+  --success-soft: rgba(39, 166, 68, 0.18);
+  --warning: #f5a524;
+  --warning-soft: rgba(245, 158, 11, 0.18);
+  --danger: #f26d6d;
+  --danger-soft: rgba(239, 68, 68, 0.18);
+  --info: #7dd3fc;
+  --info-soft: rgba(56, 189, 248, 0.14);
+  --focus-ring: rgba(34, 211, 238, 0.5);
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-overlay: var(--surface-overlay);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --radius-card: 12px;
+  --radius-control: 6px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+  }
+  * {
+    border-color: var(--border);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--primary-soft);
+  }
+  input, select, textarea, button, dialog {
+    font: inherit;
+    color: inherit;
+  }
+  /* Phones: below 16px, iOS zooms the page in when a field is tapped. */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {
+      font-size: 16px !important;
+    }
+    input[type="date"], input[type="time"], input[type="datetime-local"] {
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 0;
+      max-width: 100%;
+      display: block;
+    }
+  }
+  /* Grid and flex children may shrink below their content, so long text never pushes a column past the screen. */
+  .grid > *, .flex > * {
+    min-width: 0;
+  }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.01em;
+  }
+  code, kbd, pre {
+    font-family: var(--font-mono);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+}
+
+@layer components {
+  .tabular { font-variant-numeric: tabular-nums; }
+  .control {
+    @apply h-8 rounded-[var(--radius-control)] border border-border-strong bg-surface px-2.5 text-[13px] text-fg placeholder:text-subtle
+      focus:border-primary focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)] disabled:opacity-50;
+  }
+  .scrollbar-thin { scrollbar-width: thin; }
+  @media (max-width: 767px) {
+    .control { height: 2.75rem; }
+  }
+  .prose-plain { white-space: pre-wrap; line-height: 1.55; }
+}
+
+.row-hover:hover { background: var(--surface-raised); }
+.fade-in { animation: fade-in 150ms ease-out; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+.skeleton { background: var(--surface-raised); animation: pulse 1.4s ease-in-out infinite; border-radius: 4px; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }

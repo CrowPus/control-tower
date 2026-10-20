@@ -1,6 +1,6 @@
 # Control Tower — plan
 
-Status: **approved 2026-10-20** — the owner agreed to every decision in §11. Next: CT1.
+Status: **approved 2026-10-20** — the owner agreed to every decision in §11. CT0 and CT1 done; next: CT2. See BUILD_LOG.md.
 
 ## 1. What it is
 
@@ -132,7 +132,7 @@ Search Console / analytics. With these alone the common starter templates alread
 | Stage | What | Done when |
 |---|---|---|
 | CT0 | Repo, licence, plan, decisions | **Done 2026-10-20** |
-| CT1 | Core taken from Epliv, business code removed, runs empty | A fresh install starts, signs in, shows an empty office |
+| CT1 | Core taken from Epliv, business code removed, runs empty | **Done 2026-10-20** |
 | CT2 | Agent template + rules in the core; hard-coded agents become starter templates | An owner builds an agent in the admin and it runs under the rules |
 | CT3 | Plugin interface (Signals, Records, Actions, pages, templates), versioned and documented | A sample plugin adds a tool and an action |
 | CT4 | Epliv as a plugin on the core | Epliv runs on Control Tower with nothing lost (the proof) |

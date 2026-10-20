@@ -18,7 +18,20 @@ you give clearance, and nothing changes without it.
   ChatGPT and other agents from outside through the gateway (MCP).
 - **Self-hosted.** One install is one company. Your data and keys stay on your server.
 
-Status: planning. See [docs/PLAN.md](docs/PLAN.md).
+Status: early. The core runs (stage CT1 of [docs/PLAN.md](docs/PLAN.md)); the agent template, plugins and the
+installer come next. See [docs/BUILD_LOG.md](docs/BUILD_LOG.md).
+
+## Try it (development)
+
+```bash
+cd backend && uv sync --all-extras && cd ..
+npm install
+cp .env.example .env            # set ENCRYPTION_SECRET; GEMINI_API_KEY for the agents to think
+cd backend && uv run python -m app.prestart
+uv run python -m app.admin_cli create-owner --email you@example.com --name "Your Name"   # prints your sign-in link
+uv run uvicorn app.main:app --port 8000 &
+cd .. && npm run dev            # the admin on http://127.0.0.1:5174
+```
 
 ## License
 

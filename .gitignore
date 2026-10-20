@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+.venv
+.uv-cache
+
+# Build output
+dist
+*.tsbuildinfo
+
+# Secrets — never commit these
+.env
+.env.*
+!.env.example
+*.local
+
+# Runtime data: the development database and files
+.runtime-data
+
+# Private CA and server key for the compose PostgreSQL (deploy/postgres-tls.sh)
+tls/
+
+# Python
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov/
+
+# Test and tooling artefacts
+.playwright
+playwright-report/
+test-results/
+
+# Working notes and planning that are not part of the project
+docs/internal/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+dist-admin
+
+# Keys and credentials on the server (never committed)
+secrets/

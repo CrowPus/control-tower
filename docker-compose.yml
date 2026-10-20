@@ -1,0 +1,145 @@
+# Control Tower: the server (admin, agent gateway, media links), the worker, PostgreSQL and Redis. Optional: Nia's
+# browser (`--profile browser`) and ClamAV for attachments (`--profile clamav`).
+#
+#   cp .env.example .env        # then fill it in (at least ENCRYPTION_SECRET and POSTGRES_PASSWORD)
+#   deploy/postgres-tls.sh      # once: the private CA and certificate the database serves
+#   docker compose up -d --build
+#   docker compose exec app /app/backend/.venv/bin/python -m app.admin_cli create-owner --email you@example.com --name "Your Name"
+#
+# The server listens on the loopback interface only: put a TLS-terminating reverse proxy (Caddy, nginx) in front of it
+# and set PUBLIC_BASE_URL to the public address.
+x-app-env: &app_env
+  EXECUTION_MODE: production
+  # Only the reverse proxy can reach the loopback port, so its X-Forwarded-* headers are trusted.
+  FORWARDED_ALLOW_IPS: "*"
+  APP_NAME: ${APP_NAME:-Control Tower}
+  TIME_ZONE: ${TIME_ZONE:-UTC}
+  DATABASE_ENGINE: postgresql
+  DATABASE_URL: postgresql://tower:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/tower
+  DATABASE_SSL_MODE: ${DATABASE_SSL_MODE:-verify-full}
+  DATABASE_SSL_ROOT_CERT: ${DATABASE_SSL_ROOT_CERT:-/tls/ca.crt}
+  DATABASE_OWNERSHIP: application
+  REDIS_URL: redis://redis:6379/0
+  EMBEDDED_WORKER: "false"
+  EMBEDDED_SCHEDULER: "false"
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+  ADMIN_PUBLIC_BASE_URL: ${ADMIN_PUBLIC_BASE_URL:-${PUBLIC_BASE_URL:-http://localhost:8000}}
+  ADMIN_IP_ALLOWLIST: ${ADMIN_IP_ALLOWLIST:-}
+  ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:?set ENCRYPTION_SECRET in .env}
+  AI_DAILY_BUDGET_USD: ${AI_DAILY_BUDGET_USD:-5}
+  AI_MONTHLY_BUDGET_USD: ${AI_MONTHLY_BUDGET_USD:-60}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GEMINI_REASONING_MODEL: ${GEMINI_REASONING_MODEL:-}
+  GEMINI_FAST_MODEL: ${GEMINI_FAST_MODEL:-gemini-3.5-flash-lite}
+  GEMINI_LIVE_MODEL: ${GEMINI_LIVE_MODEL:-gemini-3.8-live}
+  CLAMD_HOST: ${CLAMD_HOST:-}
+  CLAMD_PORT: ${CLAMD_PORT:-3310}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-}
+  ADMIN_ALERT_EMAIL: ${ADMIN_ALERT_EMAIL:-}
+  SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
+  PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-}
+  PRIVACY_URL: ${PRIVACY_URL:-}
+  IMPRINT_URL: ${IMPRINT_URL:-}
+  MARKETING_DIR: /marketing
+
+services:
+  app:
+    build: { context: ., dockerfile: Dockerfile }
+    ports: ["${APP_BIND:-127.0.0.1}:${APP_PORT:-8000}:8000"]
+    environment: *app_env
+    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro"]
+    # The owner watches and takes over Nia's browser through the admin.
+    networks: [default, browser]
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  worker:
+    build: { context: ., dockerfile: Dockerfile }
+    command: ["/app/backend/.venv/bin/python", "-m", "app.worker"]
+    environment: *app_env
+    # The image's healthcheck probes the server port, which this process does not serve.
+    healthcheck:
+      test: ["CMD", "/app/backend/.venv/bin/python", "-m", "app.worker", "--check"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro"]
+    # Nia's browser is reachable only on its own network.
+    networks: [default, browser]
+    depends_on:
+      app: { condition: service_healthy }
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tower
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: tower
+    # PostgreSQL insists its key is private and owned by the database user; the mount is read-only and owned by whoever
+    # generated it, so the key is installed into the container's own filesystem before the standard entrypoint runs.
+    command: ["sh", "-c", "install -o postgres -g postgres -m 600 /tls/server.key /run/server.key && exec docker-entrypoint.sh postgres -c ssl=on -c ssl_cert_file=/tls/server.crt -c ssl_key_file=/run/server.key"]
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+      - "${TLS_DIR:-./tls}:/tls:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tower -d tower"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  browser:
+    # Nia's browser: headless Chromium behind an internal API (`--profile browser`). Its own network: it reaches the
+    # internet, not the database, Redis or the server's other parts; only the worker (Nia's steps) and the app (the
+    # owner's live view) reach it. Capped so it can never squeeze the rest of the machine.
+    profiles: ["browser"]
+    build: { context: ./browser }
+    environment:
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:?set ENCRYPTION_SECRET in .env}
+    networks: [browser]
+    volumes: ["niabrowser:/data"]
+    shm_size: 512mb
+    mem_limit: 1536m
+    cpus: 1.5
+    restart: unless-stopped
+
+  clamav:
+    # Antivirus for files attached in agent chats and mail (`--profile clamav`, then CLAMD_HOST=clamav). Not published on
+    # any host port; ~1.5 GB RAM; signatures update themselves.
+    profiles: ["clamav"]
+    image: clamav/clamav:stable
+    volumes: ["clamavdb:/var/lib/clamav"]
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
+    restart: unless-stopped
+
+networks:
+  browser: {}
+
+volumes:
+  appdata:
+  pgdata:
+  marketing:
+  niabrowser:
+  clamavdb:
