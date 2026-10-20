@@ -19,3 +19,10 @@ you give clearance, and nothing changes without it.
 - **Self-hosted.** One install is one company. Your data and keys stay on your server.
 
 Status: planning. See [docs/PLAN.md](docs/PLAN.md).
+
+## License
+
+Open source under the [GNU AGPL-3.0](LICENSE). Run it for yourself and your business; if you
+offer a modified version to others over a network, share your source — or ask for a commercial
+license: **support@dee-empire.com**. Plain-language summary: [LICENSING.md](LICENSING.md).
+Contributions under the [CLA](CLA.md).

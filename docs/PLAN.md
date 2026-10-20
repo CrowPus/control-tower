@@ -1,6 +1,6 @@
 # Control Tower — plan
 
-Status: **draft, 2026-10-20.** Waiting for the owner's decisions in §11.
+Status: **approved 2026-10-20** — the owner agreed to every decision in §11. Next: CT1.
 
 ## 1. What it is
 
@@ -131,7 +131,7 @@ Search Console / analytics. With these alone the common starter templates alread
 
 | Stage | What | Done when |
 |---|---|---|
-| CT0 | Repo, licence, plan, decisions | The owner has answered §11 |
+| CT0 | Repo, licence, plan, decisions | **Done 2026-10-20** |
 | CT1 | Core taken from Epliv, business code removed, runs empty | A fresh install starts, signs in, shows an empty office |
 | CT2 | Agent template + rules in the core; hard-coded agents become starter templates | An owner builds an agent in the admin and it runs under the rules |
 | CT3 | Plugin interface (Signals, Records, Actions, pages, templates), versioned and documented | A sample plugin adds a tool and an action |
@@ -155,13 +155,11 @@ Each stage: tests (including that no agent can pass a rule in §5), a security r
 
 ## 11. Decisions for the owner
 
-- **D1 Licence.** (a) AGPL-3.0 + paid commercial licence + CLA, like Zelyq — founders may run their business on it;
-  anyone who changes it and offers it as a service must publish their code or buy a licence *(recommended)*; or
-  (b) no commercial use (e.g. PolyForm Noncommercial) — then it is not "open source", and founders running their
-  business on it would not be allowed to.
-- **D2** New repo `CrowPus/control-tower` on GitHub (the owner creates it; pushing needs the owner's token).
-- **D3** Nia is part of the core (the chief of staff who helps build agents) *(recommended)*, not a template.
-- **D4** Starter templates from Epliv's team, in a gallery *(recommended)*.
+- **D1** ~~Licence~~ — **decided 2026-10-20: AGPL-3.0 + paid commercial licence + CLA, like Zelyq** (LICENSE,
+  LICENSING.md, CLA.md, NOTICE). Founders may run their business on it.
+- **D2** ~~New repo~~ — **decided: `CrowPus/control-tower`** (the owner creates it on GitHub; pushing needs the owner's token).
+- **D3** ~~Nia~~ — **decided: part of the core**, the chief of staff who also helps build agents.
+- **D4** ~~Starter templates~~ — **decided: yes**, Epliv's team becomes a gallery of starter templates.
 - **D5** ~~Words: keep "Approvals" or call it "Clearance"~~ — **decided 2026-10-20: "Clearance"** (agents request
   clearance, the owner gives it). Admin → Approvals becomes Admin → Clearance in the core.
 - **D6** ~~Domain for the website and docs~~ — **decided 2026-10-20: no domain for now**; docs live in the repo and in
