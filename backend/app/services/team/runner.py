@@ -366,7 +366,7 @@ def run(db: DbFactory, key: str, *, trigger: str) -> Outcome:
             problem_ = budget_problem(session, key)
         if problem_:
             raise BudgetStop(problem_)
-        # Only the team's own budgets (above): the members' AI capacity is a different budget (ai/client.py).
+        # Only the team's own budgets (above); the install-wide AI budget is checked in ai/client.py.
 
     def on_usage(u: Usage) -> None:
         totals["input_tokens"] += u.input_tokens

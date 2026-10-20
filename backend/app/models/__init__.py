@@ -43,6 +43,7 @@ from .social import (
     SocialPost,
 )
 from .team import (
+    OwnerAgent,
     TeamAgentState,
     TeamApproval,
     TeamAttachment,
@@ -69,7 +70,7 @@ __all__ = [
     "MailAccess", "MailAccount", "MailDraft", "MailFolder", "MailMessage", "MailOutbox", "MailUpload",
     "MarketingMedia", "MarketingPlan", "MarketingVideo", "SocialAccount", "NETWORKS", "SocialPost",
     "BrowserSession", "BrowserStep", "MEMORY_KINDS", "NiaConversation", "NiaMeeting", "NiaMemory", "NiaMessage", "OwnerDirective",
-    "TeamAgentState", "TeamApproval", "TeamAttachment", "TeamConversation", "TeamEvent", "TeamMessage", "TeamPlaybook", "TeamRun",
+    "OwnerAgent", "TeamAgentState", "TeamApproval", "TeamAttachment", "TeamConversation", "TeamEvent", "TeamMessage", "TeamPlaybook", "TeamRun",
     "ErrorGroup", "InsightAlert", "KpiDaily", "RequestMetric", "TelemetryEvent", "UptimeCheck",
     "EmailDelivery", "MailboxCursor",
     "AdminAuditLog", "AdminSession", "AdminUser", "PlatformSetting",

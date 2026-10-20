@@ -2695,6 +2695,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin-api/team/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Team Agent */
+        post: operations["create_team_agent_admin_api_team_agents_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin-api/team/agents/{key}": {
         parameters: {
             query?: never;
@@ -2707,7 +2724,8 @@ export interface paths {
         /** Put Team Agent */
         put: operations["put_team_agent_admin_api_team_agents__key__put"];
         post?: never;
-        delete?: never;
+        /** Archive Team Agent */
+        delete: operations["archive_team_agent_admin_api_team_agents__key__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2831,6 +2849,23 @@ export interface paths {
          * @description Say something to the agent (with files attached before); returns the conversation with its answer.
          */
         post: operations["team_say_admin_api_team_agents__key__conversations__conversation_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/team/agents/{key}/design": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Team Design */
+        put: operations["put_team_design_admin_api_team_agents__key__design_put"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2973,6 +3008,23 @@ export interface paths {
          * @description The owner's page sent the approved change; this records the decision and what came back.
          */
         post: operations["admin_change_done_admin_api_team_approvals__approval_id__admin_change_done_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/team/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Team Catalogue */
+        get: operations["team_catalogue_admin_api_team_catalogue_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3901,6 +3953,41 @@ export interface components {
             settled_at: string | null;
             /** Status */
             status: string;
+        };
+        /**
+         * Design
+         * @description The agent template: everything that makes an agent who it is.
+         */
+        Design: {
+            /** Actions */
+            actions?: string[];
+            /** Department */
+            department: string;
+            /** Emits */
+            emits?: string[];
+            /**
+             * Guide
+             * @default
+             */
+            guide: string;
+            /** Job */
+            job: string;
+            /**
+             * Kpi
+             * @default
+             */
+            kpi: string;
+            /**
+             * Max Rounds
+             * @default 0
+             */
+            max_rounds: number;
+            /** Name */
+            name: string;
+            /** Subscribes */
+            subscribes?: string[];
+            /** Tools */
+            tools?: string[];
         };
         /** DocOut */
         DocOut: {
@@ -5991,8 +6078,14 @@ export interface components {
             /** Actions */
             actions: components["schemas"]["TeamActionOut"][];
             agent: components["schemas"]["TeamAgentRow"];
+            design?: components["schemas"]["Design"] | null;
             /** Emits */
             emits: string[];
+            /**
+             * Guide
+             * @default
+             */
+            guide: string;
             /** Notes */
             notes: components["schemas"]["TeamNote"][];
             playbook: components["schemas"]["TeamPlaybookOut"] | null;
@@ -6003,6 +6096,11 @@ export interface components {
             settings: components["schemas"]["AgentSettings"];
             /** Subscribes */
             subscribes: string[];
+            /**
+             * Template
+             * @default
+             */
+            template: string;
             /** Tools */
             tools: components["schemas"]["TeamToolOut"][];
         };
@@ -6130,6 +6228,30 @@ export interface components {
             /** Size */
             size: number;
         };
+        /**
+         * TeamCatalogueOut
+         * @description Everything the agent template is made of, and the rules a design must keep.
+         */
+        TeamCatalogueOut: {
+            /** Actions */
+            actions: components["schemas"]["TeamActionOut"][];
+            /** Common Tools */
+            common_tools: components["schemas"]["TeamToolOut"][];
+            /** Departments */
+            departments: string[];
+            /** Kpis */
+            kpis: components["schemas"]["TeamKpiOut"][];
+            /** Max Events */
+            max_events: number;
+            /** Max Rounds */
+            max_rounds: number;
+            /** Min Job */
+            min_job: number;
+            /** Templates */
+            templates: components["schemas"]["TeamTemplateOut"][];
+            /** Tools */
+            tools: components["schemas"]["TeamToolOut"][];
+        };
         /** TeamChatOut */
         TeamChatOut: {
             /** Conversations */
@@ -6197,6 +6319,13 @@ export interface components {
             /** Type */
             type: string;
         };
+        /** TeamKpiOut */
+        TeamKpiOut: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+        };
         /** TeamMailboxIn */
         TeamMailboxIn: {
             /**
@@ -6261,6 +6390,20 @@ export interface components {
             text: string;
             /** Tools */
             tools: string[];
+        };
+        /** TeamNewAgentIn */
+        TeamNewAgentIn: {
+            design: components["schemas"]["Design"];
+            /**
+             * Playbook
+             * @default
+             */
+            playbook: string;
+            /**
+             * Template
+             * @default
+             */
+            template: string;
         };
         /** TeamNote */
         TeamNote: {
@@ -6407,6 +6550,20 @@ export interface components {
         TeamStartOut: {
             /** Queued */
             queued: boolean;
+        };
+        /** TeamTemplateOut */
+        TeamTemplateOut: {
+            /** Department */
+            department: string;
+            design: components["schemas"]["Design"];
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Playbook */
+            playbook: string;
+            /** Tags */
+            tags: string[];
         };
         /** TeamToolOut */
         TeamToolOut: {
@@ -11881,6 +12038,39 @@ export interface operations {
             };
         };
     };
+    create_team_agent_admin_api_team_agents_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamNewAgentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamAgentDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     team_agent_admin_api_team_agents__key__get: {
         parameters: {
             query?: never;
@@ -11934,6 +12124,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamAgentDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_team_agent_admin_api_team_agents__key__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamOverviewOut"];
                 };
             };
             /** @description Validation Error */
@@ -12163,6 +12384,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_team_design_admin_api_team_agents__key__design_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Design"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamAgentDetailOut"];
                 };
             };
             /** @description Validation Error */
@@ -12445,6 +12701,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_catalogue_admin_api_team_catalogue_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamCatalogueOut"];
                 };
             };
         };

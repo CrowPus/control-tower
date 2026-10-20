@@ -57,7 +57,7 @@ def ready(session: Any, key: str) -> str:
 
 
 def _chat_rules(agent: registry.Agent, run_only: list[str]) -> str:
-    missing = (f"\n- In this chat you cannot use {', '.join(run_only)}: they count members from their profiles, which only your scheduled runs may do. "
+    missing = (f"\n- In this chat you cannot use {', '.join(run_only)}: they only work in your scheduled runs. "
                "If the owner needs them, say so and suggest Run now on your page.") if run_only else ""
     return f"""
 
@@ -66,7 +66,7 @@ YOU ARE TALKING WITH THE OWNER NOW (Admin → Team → {agent.name} → Chat). A
 - Use your tools for facts; never guess numbers. If a tool you need is not yours, name it: the owner grants tools on your page.
 - When the owner asks for something you can propose, propose it now; it appears as a card under your answer for the owner to approve. Never say it happened.
 - When the owner tells you how to work from now on (a rule, a priority, a limit, a way of writing), propose playbook.change with the WHOLE new playbook (your current playbook with the change worked in) and a note saying what changed; say it applies once the owner approves the card.
-- When the owner shares facts that matter for later runs, keep a note (keep_note) — never personal data of members.{missing}"""
+- When the owner shares facts that matter for later runs, keep a note (keep_note) — never personal data.{missing}"""
 
 
 def _files(session: Any, conversation_id: int) -> tuple[str, list[tuple[str, bytes]]]:

@@ -269,7 +269,7 @@ def _admin_endpoints(_ctx: Context, section: str = "", path_prefix: str = "") ->
     if path_prefix:
         prefixes.append(path_prefix)
     if not prefixes:
-        return {"error": "Give a Docs section (e.g. opportunities) or an address prefix (e.g. /admin-api/listings)."}
+        return {"error": "Give a Docs section (e.g. team) or an address prefix (e.g. /admin-api/team)."}
     return {"endpoints": admin_changes.describe(prefixes)[:60]}
 
 
@@ -628,6 +628,24 @@ def _hide_secrets(value: Any) -> Any:
     return value
 
 
+def _agent_templates(_ctx: Context) -> dict[str, Any]:
+    """What a new agent can be made of, for proposing one (agent.create): the starter templates, the tools and actions the
+    template offers, the Insights numbers a goal can be, and the rules a design must keep."""
+    from . import agents, templates
+
+    return {
+        "templates": [{"key": t.key, "name": t.name, "department": t.department, "job": t.job, "tools": list(t.tools), "actions": list(t.actions),
+                       "subscribes": list(t.subscribes), "emits": list(t.emits), "kpi": t.kpi} for t in templates.TEMPLATES],
+        "tools": {k: CATALOGUE[k][1] for k in agents.offered_tools()},
+        "every_agent_has": list(registry.COMMON_TOOLS),
+        "actions": {k: registry.ACTIONS[k].label for k in agents.offered_actions()},
+        "kpis": list(queries.BY_KEY),
+        "departments": registry.departments(),
+        "rules": [f"a job of at least {agents.MIN_JOB} characters", "at least one tool besides the ones every agent has",
+                  "event names like 'marketing.brief'", f"at most {agents.MAX_ROUNDS} rounds", "never Nia's own tools or admin.change / agent.create"],
+    }
+
+
 def _agent_profile(ctx: Context, agent: str) -> dict[str, Any]:
     """One agent's whole picture: its design (job, how it works, tools, the actions it may propose and their shape), the
     owner's settings for it, its current playbook and its last runs. Read before writing or changing its playbook or settings."""
@@ -774,9 +792,9 @@ CATALOGUE: dict[str, Tool] = {
                       {"days": {"type": "INTEGER", "description": "Days to look back (1-365)."}}, []),
     "read_events": (_read_events, "The team's latest events (handoffs), newest first, optionally of one type.",
                     {"type": {"type": "STRING"}, "limit": {"type": "INTEGER"}}, []),
-    "search_brain": (_search_brain, "Search the team's shared brain by words: every agent's notes, the proposals and the owner's decisions on them, the "
-                     "opportunities with their categories, Nia's memories of the owner's decisions and the owner's directives — each with what it is linked to. "
-                     "Read it before you work on an opportunity or a topic another agent may already know about. Optional kind: " + ", ".join(brain.KINDS) + ".",
+    "search_brain": (_search_brain, "Search the team's shared brain by words: every agent's notes, the proposals and the owner's decisions on them, "
+                     "Nia's memories of the owner's decisions and the owner's directives — each with what it is linked to. "
+                     "Read it before you work on a topic another agent may already know about. Optional kind: " + ", ".join(brain.KINDS) + ".",
                      {"query": {"type": "STRING"}, "kind": {"type": "STRING"}}, ["query"]),
     "proposal_status": (_proposal_status, "What really became of your proposals of the last days (or the ids you give) and of Nia's directives: waiting, done, "
                         "failed (with the reason) or rejected. Check it before telling the owner something is done or approved.",
@@ -789,7 +807,7 @@ CATALOGUE: dict[str, Tool] = {
                    {"type": {"type": "STRING"}, "payload_json": {"type": "STRING", "description": "A JSON object with the facts (ids and numbers, no personal data)."}}, ["type"]),
     "web_search": (_web_search, "Search the web (Google): an answer with its source links. Confirm every fact on its official page (read_web_page) before using it.",
                    {"query": {"type": "STRING"}}, ["query"]),
-    "read_web_page": (_read_web_page, "Read a public web page (for example an organiser's official page or an embassy's rules) as text with its links.",
+    "read_web_page": (_read_web_page, "Read a public web page (for example a company's official page or a public rule) as text with its links.",
                       {"url": {"type": "STRING"}}, ["url"]),
     "report_directive": (_report_directive, "Report progress on one of the owner's directives to you (and whether it is done).",
                          {"directive_id": {"type": "INTEGER"}, "progress": {"type": "STRING"}, "done": {"type": "BOOLEAN"}}, ["directive_id", "progress"]),
@@ -797,7 +815,7 @@ CATALOGUE: dict[str, Tool] = {
     "agent_report": (_agent_report, "One agent's latest runs with their summaries.", {"agent": {"type": "STRING"}, "runs": {"type": "INTEGER"}}, ["agent"]),
     "approvals_waiting": (_approvals_waiting, "What waits for the owner's approval.", {}, []),
     "read_admin_docs": (_read_admin_docs, "How the admin works, from Admin → Docs (the text the owner reads): no arguments for the list of sections; "
-                        "query to search; section (a key) or page (an admin address like /opportunities) to read one in full.",
+                        "query to search; section (a key) or page (an admin address like /team) to read one in full.",
                         {"query": {"type": "STRING"}, "section": {"type": "STRING"}, "page": {"type": "STRING"}}, []),
     "admin_endpoints": (_admin_endpoints, "The admin's server functions for one Docs section (section key) or under an address (path_prefix): method, path, "
                         "what it does, its query names and the exact body it takes. Use it before propose_admin_change.",
@@ -812,7 +830,7 @@ CATALOGUE: dict[str, Tool] = {
     "remember": (_remember, "Remember something for later: kind person (about the owner: who they are, family, how they work), decision (the owner "
                  "decided), preference (how the owner likes things), work (what you and the owner did together: what was done, the result, what is "
                  "still open), lesson (learned from results, with evidence) or fact. topic: one or two words it belongs to (website, "
-                 "opportunities, finance, Nia, a country …) — the branch of the memory tree.",
+                 "customers, finance, Nia, a country …) — the branch of the memory tree.",
                  {"kind": {"type": "STRING"}, "text": {"type": "STRING"}, "evidence": {"type": "STRING"}, "topic": {"type": "STRING"}}, ["kind", "text"]),
     "propose_directive": (_propose_directive, "Turn the owner's instruction into a directive for agents (keys from team_overview). The owner confirms it on screen before it reaches them.",
                           {"text": {"type": "STRING"}, "agents": {"type": "ARRAY", "items": {"type": "STRING"}}, "goal": {"type": "STRING"}, "due_on": {"type": "STRING"}}, ["text", "agents"]),
@@ -867,11 +885,13 @@ CATALOGUE: dict[str, Tool] = {
                {"goal": {"type": "STRING"}, "url": {"type": "STRING"}}, ["goal"]),
     "browser_status": (_browser_status, "How the browser session stands: status (running, asking, owner, paused, done, stopped), the question waiting "
                        "for the owner, the last steps, the report when done.", {}, []),
+    "agent_templates": (_agent_templates, "What a new agent can be made of: the starter templates, the tools and actions the agent template offers, "
+                        "the goal numbers and the rules. Read it before proposing a new agent (agent.create).", {}, []),
     "agent_profile": (_agent_profile, "One agent's whole picture: its job and built-in guide, its tools (and which are not ticked), the actions it may propose "
                       "with their shape, the owner's settings (schedule, model, budget, levels), its current playbook and its last runs. Read it before "
-                      "writing or changing the agent's playbook or settings.", {"agent": {"type": "STRING", "description": "The agent's key, e.g. scout."}}, ["agent"]),
-    "read_settings": (_read_settings, "The admin's current values of one setting (secrets hidden), e.g. research, discovery, travel, plans, membership, "
-                      "matching, engagement, delivery, brand, marketing, social, support, insights, agents. Without key: the list. Read before a change: "
+                      "writing or changing the agent's playbook or settings.", {"agent": {"type": "STRING", "description": "The agent's key, e.g. marketing_lead."}}, ["agent"]),
+    "read_settings": (_read_settings, "The admin's current values of one setting (secrets hidden), e.g. brand, marketing, social, "
+                      "insights, agents, qa, trust, nia. Without key: the list. Read before a change: "
                       "a PUT replaces the whole setting.", {"key": {"type": "STRING"}}, []),
     "run_agent": (_run_agent, "Start one agent's run now, only because the owner just asked for it. Its result comes later (agent_report).",
                   {"agent": {"type": "STRING", "description": "The agent's key."}}, ["agent"]),

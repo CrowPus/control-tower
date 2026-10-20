@@ -1828,6 +1828,83 @@
         "title": "DeliveryRow",
         "type": "object"
       },
+      "Design": {
+        "description": "The agent template: everything that makes an agent who it is.",
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Actions",
+            "type": "array"
+          },
+          "department": {
+            "maxLength": 40,
+            "minLength": 2,
+            "title": "Department",
+            "type": "string"
+          },
+          "emits": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Emits",
+            "type": "array"
+          },
+          "guide": {
+            "default": "",
+            "maxLength": 6000,
+            "title": "Guide",
+            "type": "string"
+          },
+          "job": {
+            "maxLength": 2000,
+            "title": "Job",
+            "type": "string"
+          },
+          "kpi": {
+            "default": "",
+            "maxLength": 60,
+            "title": "Kpi",
+            "type": "string"
+          },
+          "max_rounds": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Max Rounds",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 60,
+            "minLength": 2,
+            "title": "Name",
+            "type": "string"
+          },
+          "subscribes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subscribes",
+            "type": "array"
+          },
+          "tools": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 40,
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "department",
+          "job"
+        ],
+        "title": "Design",
+        "type": "object"
+      },
       "DocOut": {
         "properties": {
           "body": {
@@ -7399,12 +7476,27 @@
           "agent": {
             "$ref": "#/components/schemas/TeamAgentRow"
           },
+          "design": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Design"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "emits": {
             "items": {
               "type": "string"
             },
             "title": "Emits",
             "type": "array"
+          },
+          "guide": {
+            "default": "",
+            "title": "Guide",
+            "type": "string"
           },
           "notes": {
             "items": {
@@ -7446,6 +7538,11 @@
             },
             "title": "Subscribes",
             "type": "array"
+          },
+          "template": {
+            "default": "",
+            "title": "Template",
+            "type": "string"
           },
           "tools": {
             "items": {
@@ -7806,6 +7903,78 @@
         "title": "TeamAttachmentOut",
         "type": "object"
       },
+      "TeamCatalogueOut": {
+        "description": "Everything the agent template is made of, and the rules a design must keep.",
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/TeamActionOut"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "common_tools": {
+            "items": {
+              "$ref": "#/components/schemas/TeamToolOut"
+            },
+            "title": "Common Tools",
+            "type": "array"
+          },
+          "departments": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Departments",
+            "type": "array"
+          },
+          "kpis": {
+            "items": {
+              "$ref": "#/components/schemas/TeamKpiOut"
+            },
+            "title": "Kpis",
+            "type": "array"
+          },
+          "max_events": {
+            "title": "Max Events",
+            "type": "integer"
+          },
+          "max_rounds": {
+            "title": "Max Rounds",
+            "type": "integer"
+          },
+          "min_job": {
+            "title": "Min Job",
+            "type": "integer"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/TeamTemplateOut"
+            },
+            "title": "Templates",
+            "type": "array"
+          },
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/TeamToolOut"
+            },
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "templates",
+          "tools",
+          "common_tools",
+          "actions",
+          "kpis",
+          "departments",
+          "min_job",
+          "max_rounds",
+          "max_events"
+        ],
+        "title": "TeamCatalogueOut",
+        "type": "object"
+      },
       "TeamChatOut": {
         "properties": {
           "conversations": {
@@ -7960,6 +8129,24 @@
           "created_at"
         ],
         "title": "TeamEventOut",
+        "type": "object"
+      },
+      "TeamKpiOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "TeamKpiOut",
         "type": "object"
       },
       "TeamMailboxIn": {
@@ -8120,6 +8307,30 @@
           "created_at"
         ],
         "title": "TeamMessageOut",
+        "type": "object"
+      },
+      "TeamNewAgentIn": {
+        "properties": {
+          "design": {
+            "$ref": "#/components/schemas/Design"
+          },
+          "playbook": {
+            "default": "",
+            "maxLength": 20000,
+            "title": "Playbook",
+            "type": "string"
+          },
+          "template": {
+            "default": "",
+            "maxLength": 40,
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "design"
+        ],
+        "title": "TeamNewAgentIn",
         "type": "object"
       },
       "TeamNote": {
@@ -8485,6 +8696,46 @@
           "queued"
         ],
         "title": "TeamStartOut",
+        "type": "object"
+      },
+      "TeamTemplateOut": {
+        "properties": {
+          "department": {
+            "title": "Department",
+            "type": "string"
+          },
+          "design": {
+            "$ref": "#/components/schemas/Design"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "playbook": {
+            "title": "Playbook",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "department",
+          "design",
+          "playbook",
+          "tags"
+        ],
+        "title": "TeamTemplateOut",
         "type": "object"
       },
       "TeamToolOut": {
@@ -16376,7 +16627,88 @@
         ]
       }
     },
+    "/admin-api/team/agents": {
+      "post": {
+        "operationId": "create_team_agent_admin_api_team_agents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamNewAgentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamAgentDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Team Agent",
+        "tags": [
+          "admin-team"
+        ]
+      }
+    },
     "/admin-api/team/agents/{key}": {
+      "delete": {
+        "operationId": "archive_team_agent_admin_api_team_agents__key__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamOverviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Archive Team Agent",
+        "tags": [
+          "admin-team"
+        ]
+      },
       "get": {
         "operationId": "team_agent_admin_api_team_agents__key__get",
         "parameters": [
@@ -16832,6 +17164,58 @@
         ]
       }
     },
+    "/admin-api/team/agents/{key}/design": {
+      "put": {
+        "operationId": "put_team_design_admin_api_team_agents__key__design_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Design"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamAgentDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Team Design",
+        "tags": [
+          "admin-team"
+        ]
+      }
+    },
     "/admin-api/team/agents/{key}/notes": {
       "put": {
         "operationId": "put_team_notes_admin_api_team_agents__key__notes_put",
@@ -17248,6 +17632,27 @@
           }
         },
         "summary": "Admin Change Done",
+        "tags": [
+          "admin-team"
+        ]
+      }
+    },
+    "/admin-api/team/catalogue": {
+      "get": {
+        "operationId": "team_catalogue_admin_api_team_catalogue_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCatalogueOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Team Catalogue",
         "tags": [
           "admin-team"
         ]

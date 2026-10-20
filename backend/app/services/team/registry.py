@@ -10,6 +10,9 @@ do alone are the owner's settings (`agents` in the platform settings, Admin → 
 
 from __future__ import annotations
 
+import threading
+import time
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from typing import Literal
 
@@ -54,8 +57,8 @@ ACTIONS: dict[str, ActionType] = {
     for a in (
         ActionType("playbook.change", "Change the agent's own playbook", "L3", '{"text": "the whole new playbook", "note": "what changed"}'),
         ActionType("product.idea", "A change to the product, with the number it should move (measured before and after)", "L2",
-                   '{"title": "short", "problem": "what members run into, with the numbers", "idea": "the change, concrete enough to build", '
-                   '"evidence": ["each number or member words it rests on"], "metric": "an Insights number key", "expect": "up|down", "measure_days": 14}'),
+                   '{"title": "short", "problem": "what customers run into, with the numbers", "idea": "the change, concrete enough to build", '
+                   '"evidence": ["each number or customer words it rests on"], "metric": "an Insights number key", "expect": "up|down", "measure_days": 14}'),
         ActionType("social.post", "A social media post (published by the service after approval)", "L2",
                    '{"networks": ["instagram", "facebook", "linkedin", "youtube", "x"], "kind": "text|image|carousel|video", "text": "the post as most networks get it", '
                    '"texts": {"linkedin": "a version for one network, when it differs"}, "media_ids": [1], "link": "https://… the company’s own address", '
@@ -73,12 +76,17 @@ ACTIONS: dict[str, ActionType] = {
                    '"facts_used": ["each statement about the company in the video, copied from brand_kit"]}'),
         ActionType("marketing.plan", "The Marketing Lead's campaign plan for a period", "L3",
                    '{"title": "…", "period_start": "YYYY-MM-DD", "period_end": "YYYY-MM-DD", "summary": "the plan in five sentences", '
-                   '"goals": [{"metric": "new members from Ghana", "target": 40, "baseline": 5}], "audiences": [{"name": "…", "who": "…", "where": "the countries", "why_now": "the open opportunities behind it"}], '
+                   '"goals": [{"metric": "new customers from one audience", "target": 40, "baseline": 5}], "audiences": [{"name": "…", "who": "…", "where": "where they are", "why_now": "why they need it now"}], '
                    '"campaigns": [{"name": "…", "audience": "…", "channels": ["instagram", "facebook", "tiktok"], "message": "…", "content": ["3 posts a week: …"], "budget_note": "…"}], '
                    '"briefs": {"content_community": "what Social Media makes this period", "graphic_designer": "the video themes and series this period"}, '
                    '"measures": ["how success is read: sign-ups, reach, engagement"]}'),
         ActionType("admin.change", "Change something in the admin, exactly as shown", "L3",
                    '{"method": "PUT", "path": "/admin-api/...", "query": {}, "body": {"as admin_endpoints describes it": "..."}}'),
+        ActionType("agent.create", "A new agent for the team, made from the agent template (switched off until the owner sets it up)", "L3",
+                   '{"template": "a starter template key from agent_templates, or empty for a blank one", "name": "…", "department": "…", '
+                   '"job": "what it is for, in a sentence or two", "guide": "how it works, step by step", "tools": ["tools from agent_templates"], '
+                   '"actions": ["actions it may propose"], "subscribes": ["events that wake it"], "emits": ["events it sends"], '
+                   '"kpi": "an Insights number key or empty", "playbook": "the owner\'s first instructions to it (optional)"}'),
     )
 }
 
@@ -90,11 +98,11 @@ _AGENTS = (
                  "read_admin_docs", "admin_endpoints", "propose_admin_change", "social_overview", "social_results", "marketing_plans",
                  "browse", "browser_status", "browser_answer",
                  # Running the team for the owner: every agent's picture, the admin's settings, starting and asking agents.
-                 "agent_profile", "read_settings", "run_agent", "ask_agent",
+                 "agent_profile", "read_settings", "run_agent", "ask_agent", "agent_templates",
                  # Every desk seen by Nia herself, so the owner never has to open each page.
                  "health_numbers", "ops_signals", "incidents", "qa_history", "product_ideas", "content_calendar", "video_studio",
                  "web_search", "read_web_page"),
-          actions=("admin.change",), max_rounds=16,
+          actions=("admin.change", "agent.create"), max_rounds=16,
           guide=("You speak for the whole team. A rundown follows this order: where the company stands (the numbers that matter, with the change), "
                  "what changed since the last one, what needs the owner (proposals waiting for clearance, settings agents wait for, risks), then each "
                  "agent in one or two sentences. Answer from your tools and memory; say when you do not know. When the owner gives an instruction for "
@@ -117,7 +125,83 @@ _AGENTS = (
                  "Never claim you did something no tool did. " + _FACTS_ONLY)),
 )
 
-AGENTS: dict[str, Agent] = {a.key: a for a in _AGENTS}
+class _Team(Mapping[str, Agent]):
+    """Every agent on the team: the built-in ones (Nia) and the owner's own, read from `owner_agents`.
+
+    Read like a dict everywhere (the dispatcher, the team page, the office, the brain). The owner's agents are read
+    again at most every REFRESH_SECONDS in each process, and at once after a change in this process (`changed()`), so
+    the server and the worker both see a new agent within seconds."""
+
+    REFRESH_SECONDS = 3.0
+
+    def __init__(self, built_in: tuple[Agent, ...]) -> None:
+        self._built_in: dict[str, Agent] = {a.key: a for a in built_in}
+        self._owned: dict[str, Agent] = {}
+        self._read_at = 0.0
+        self._lock = threading.Lock()
+
+    def _current(self) -> dict[str, Agent]:
+        if time.monotonic() - self._read_at > self.REFRESH_SECONDS:
+            with self._lock:
+                if time.monotonic() - self._read_at > self.REFRESH_SECONDS:
+                    self._owned = _read_owned()
+                    self._read_at = time.monotonic()
+        return {**self._built_in, **{k: v for k, v in self._owned.items() if k not in self._built_in}}
+
+    def changed(self) -> None:
+        """An agent was made, changed or archived here: read them again at the next look."""
+        self._read_at = 0.0
+
+    def remember(self, agent: Agent) -> None:
+        """An owner agent made or changed in this process: seen at once, before its transaction commits (the next re-read
+        replaces it with what the database holds, so a change that was rolled back disappears within seconds)."""
+        with self._lock:
+            self._owned = {**self._owned, agent.key: agent}
+            self._read_at = time.monotonic()
+
+    def forget(self, key: str) -> None:
+        with self._lock:
+            self._owned = {k: v for k, v in self._owned.items() if k != key}
+            self._read_at = time.monotonic()
+
+    def setdefault(self, key: str, agent: Agent) -> Agent:
+        """A built-in agent (tests register theirs this way)."""
+        return self._built_in.setdefault(key, agent)
+
+    def __getitem__(self, key: str) -> Agent:
+        return self._current()[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._current())
+
+    def __len__(self) -> int:
+        return len(self._current())
+
+
+def _read_owned() -> dict[str, Agent]:
+    from sqlalchemy import select
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from ...db import transaction
+    from ...models import OwnerAgent
+
+    try:
+        with transaction() as session:
+            rows = session.execute(select(OwnerAgent).where(OwnerAgent.status == "active").order_by(OwnerAgent.id)).scalars().all()
+            return {r.key: from_row(r) for r in rows}
+    except SQLAlchemyError:  # before the first migration: no owner agents yet
+        return {}
+
+
+def from_row(row: object) -> Agent:
+    """An owner agent's design as the team's machinery sees it."""
+    return Agent(key=row.key, name=row.name, department=row.department, purpose=row.job, kpi=row.kpi or "",  # type: ignore[attr-defined]
+                 subscribes=tuple(row.subscribes or ()), emits=tuple(row.emits or ()), tools=tuple(row.tools or ()),  # type: ignore[attr-defined]
+                 actions=tuple(row.actions or ()), guide=row.guide or "", max_rounds=row.max_rounds or 0)  # type: ignore[attr-defined]
+
+
+AGENTS = _Team(_AGENTS)
+BUILT_IN = tuple(a.key for a in _AGENTS)
 
 
 def departments() -> list[str]:

@@ -85,9 +85,10 @@ def agent(session: Session, key: str) -> AgentSettings:
     return AgentSettings.model_validate((_raw(session).get("by_agent") or {}).get(key) or {})
 
 
-def check(key: str, value: AgentSettings) -> AgentSettings:
-    """Refuse settings the agent's design does not allow (ValueError with the reason)."""
-    spec = registry.get(key)
+def check(key: str, value: AgentSettings, spec: registry.Agent | None = None) -> AgentSettings:
+    """Refuse settings the agent's design does not allow (ValueError with the reason). `spec`: a design not yet saved
+    (an agent being made in this transaction)."""
+    spec = spec or registry.get(key)
     if spec is None:
         raise ValueError(f"Unknown agent: {key}")
     unknown_tools = set(value.tools) - set(registry.tools_of(spec))
@@ -124,10 +125,10 @@ def schedule_text(value: AgentSchedule) -> str:
     return f"{' and '.join(parts).capitalize()}, {days} (your time zone)."
 
 
-def save_agent(session: Session, key: str, value: AgentSettings) -> None:
+def save_agent(session: Session, key: str, value: AgentSettings, spec: registry.Agent | None = None) -> None:
     raw = _raw(session)
     by_agent = dict(raw.get("by_agent") or {})
-    by_agent[key] = check(key, value).model_dump()
+    by_agent[key] = check(key, value, spec).model_dump()
     platform.put(session, "agents", {**raw, "by_agent": by_agent})
 
 

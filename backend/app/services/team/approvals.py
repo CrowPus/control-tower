@@ -36,24 +36,19 @@ class ProposalRefused(ValueError):
 TARGET: dict[str, str] = {
     "playbook.change": "",
     "product.idea": "title",
-    "members.tip": "group",
     "marketing.plan": "",
-    "source.add": "url",
-    "research.focus": "",
-    "listing.verdict": "listing_id",
-    "showcase.list": "country",
-    "listing.complete": "listing_id",
+    "agent.create": "name",
 }
 
 
 # Action types whose newer proposal replaces the one still waiting (it holds everything the older one did).
-REPLACES = ("playbook.change", "marketing.plan", "research.focus", "showcase.list")
+REPLACES = ("playbook.change", "marketing.plan")
 
 # Checks made when an agent proposes (the agent hears what is wrong at once, not when the owner approves).
 CHECKS: dict[str, Callable[[Session, dict[str, Any]], list[str]]] = {}
 
 # Checks made again on every waiting proposal (team.dispatch, each minute) and shown on its Approvals card: a proposal
-# that became a duplicate (another one about the same company was carried out, a letter went out) is withdrawn, so the
+# that became a duplicate (another one about the same thing was carried out) is withdrawn, so the
 # owner never approves the same thing twice.
 RECHECKS: dict[str, Callable[[Session, TeamApproval], list[str]]] = {}
 

@@ -2,7 +2,7 @@
    agent by department with its state, cost and what it waits for. Nothing here has a value
    until the owner sets it. */
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Globe, Inbox, Mail } from "lucide-react";
+import { ChevronRight, Globe, Inbox, Mail, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, unwrap, type Schemas } from "../api";
@@ -65,9 +65,10 @@ export function TeamPage({ owner }: { owner: boolean }) {
     <>
       <PageTitle
         title="Team"
-        description="The agents that run the company with you. They propose; you clear. Every value — budgets, schedules, tools, limits — is yours to set; an agent waits until it has what it needs."
+        description="The agents that run the company with you — Nia, and every agent you make. They propose; you clear. Every value — budgets, schedules, tools, limits — is yours to set; an agent waits until it has what it needs."
         actions={
           <>
+            {owner && <Link to="/team/new"><Button variant="primary"><Plus className="h-3.5 w-3.5" aria-hidden />New agent</Button></Link>}
             <Link to="/clearance"><Button variant={data.pending_approvals ? "primary" : "secondary"}><Inbox className="h-3.5 w-3.5" aria-hidden />Clearance{data.pending_approvals ? ` (${data.pending_approvals})` : ""}</Button></Link>
             <Link to="/team/mailboxes"><Button><Mail className="h-3.5 w-3.5" aria-hidden />Mailboxes</Button></Link>
             <Link to="/team/outside"><Button><Globe className="h-3.5 w-3.5" aria-hidden />Outside agents</Button></Link>

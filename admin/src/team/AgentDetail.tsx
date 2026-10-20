@@ -8,6 +8,7 @@ import { api, unwrap, type Schemas } from "../api";
 import { useAction } from "../hooks";
 import { Alert, Badge, Button, Card, Empty, Field, Input, PageTitle, Select, StatusBadge, Table, Td, Textarea, Toggle, ago, usd, when } from "../ui";
 import { AgentChatCard } from "./AgentChat";
+import { DesignCard } from "./Design";
 import { AgentState, NumberSetting } from "./Team";
 
 type Settings = Schemas["AgentSettings"];
@@ -251,6 +252,7 @@ export function AgentDetailPage({ owner }: { owner: boolean }) {
       {agent.status === "waiting" && <div className="mb-4"><Alert tone="warning">Waiting for: {agent.waiting_for.join(", ")}.</Alert></div>}
       {agent.schedule_problem && <div className="mb-4"><Alert tone="warning">{agent.schedule_problem}</Alert></div>}
       <OfferCard owner={owner} detail={data} keyName={keyName} />
+      <DesignCard owner={owner} detail={data} keyName={keyName} />
       {<div className="mb-4"><AgentChatCard keyName={keyName} name={agent.name} owner={owner} /></div>}
       <div className="grid gap-4 xl:grid-cols-2">
         <SettingsCard owner={owner} detail={data} keyName={keyName} />

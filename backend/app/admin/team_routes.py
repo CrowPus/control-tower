@@ -15,6 +15,7 @@ from sqlalchemy import func, select
 from ..core.errors import NotFound, ValidationFailed
 from ..db import admin_transaction
 from ..models import (
+    OwnerAgent,
     TeamApproval,
     TeamAttachment,
     TeamConversation,
@@ -23,8 +24,10 @@ from ..models import (
     TeamPlaybook,
     TeamRun,
 )
+from ..services.insights import queries as insight_queries
 from ..services.team import (
     admin_changes,
+    agents,
     approvals,
     attachments,
     config,
@@ -32,6 +35,7 @@ from ..services.team import (
     mailboxes,
     registry,
     tasks,
+    templates,
     tools,
 )
 from ..services.team import chat as agent_chat
@@ -119,6 +123,11 @@ class TeamRunOut(BaseModel):
 
 class TeamAgentDetailOut(BaseModel):
     agent: TeamAgentRow
+    # The owner's agents: their design (the agent template, as saved) and the starter template it began from.
+    # Built-in agents (Nia) have none: their design is part of Control Tower.
+    design: agents.Design | None = None
+    template: str = ""
+    guide: str = ""
     settings: config.AgentSettings
     tools: list[TeamToolOut]
     actions: list[TeamActionOut]
@@ -172,6 +181,41 @@ class TeamDecisionIn(BaseModel):
 class TeamPlaybookIn(BaseModel):
     text: str = Field(max_length=20000)
     note: str = Field(default="", max_length=300)
+
+
+class TeamTemplateOut(BaseModel):
+    key: str
+    name: str
+    department: str
+    design: agents.Design
+    playbook: str
+    tags: list[str]
+
+
+class TeamKpiOut(BaseModel):
+    key: str
+    label: str
+
+
+class TeamCatalogueOut(BaseModel):
+    """Everything the agent template is made of, and the rules a design must keep."""
+
+    templates: list[TeamTemplateOut]
+    tools: list[TeamToolOut]
+    common_tools: list[TeamToolOut]
+    actions: list[TeamActionOut]
+    kpis: list[TeamKpiOut]
+    departments: list[str]
+    min_job: int
+    max_rounds: int
+    max_events: int
+
+
+class TeamNewAgentIn(BaseModel):
+    # A starter template's key, or empty for a blank design; the design as the owner edited it.
+    template: str = Field(default="", max_length=40)
+    design: agents.Design
+    playbook: str = Field(default="", max_length=20000)
 
 
 class TeamNotesIn(BaseModel):
@@ -293,8 +337,12 @@ def _detail(session: AdminDb, agent: registry.Agent) -> TeamAgentDetailOut:
     versions = list(session.execute(select(TeamPlaybook).where(TeamPlaybook.agent == agent.key).order_by(TeamPlaybook.version.desc()).limit(30)).scalars())
     runs = list(session.execute(select(TeamRun).where(TeamRun.agent == agent.key).order_by(TeamRun.started_at.desc()).limit(20)).scalars())
     notes = [TeamNote.model_validate(n) for n in events.state(session, agent.key).notes]
+    owned = session.execute(select(OwnerAgent).where(OwnerAgent.key == agent.key)).scalar_one_or_none()
+    design = agents.Design(name=agent.name, department=agent.department, job=agent.purpose, guide=agent.guide, tools=list(agent.tools),
+                           actions=list(agent.actions), subscribes=list(agent.subscribes), emits=list(agent.emits), kpi=agent.kpi,
+                           max_rounds=agent.max_rounds) if owned is not None else None
     return TeamAgentDetailOut(
-        agent=_row(session, agent), settings=mine,
+        agent=_row(session, agent), design=design, template=owned.template if owned else "", guide=agent.guide, settings=mine,
         tools=[TeamToolOut(key=t, description=tools.CATALOGUE[t][1]) for t in registry.tools_of(agent) if t in tools.CATALOGUE],
         actions=[TeamActionOut(key=a, label=registry.ACTIONS[a].label, ceiling=registry.ACTIONS[a].ceiling, level=config.level_of(mine, a),
                                approved_in_a_row=approvals.streak(session, agent.key, a)) for a in registry.actions_of(agent)],
@@ -302,6 +350,61 @@ def _detail(session: AdminDb, agent: registry.Agent) -> TeamAgentDetailOut:
         playbook=_playbook(versions[0]) if versions else None, playbook_versions=[_playbook(v) for v in versions],
         notes=notes, runs=[_run(r) for r in runs],
     )
+
+
+@router.get("/catalogue", response_model=TeamCatalogueOut)
+def team_catalogue(_ctx: CurrentAdmin) -> TeamCatalogueOut:
+    def template(t: templates.Template) -> TeamTemplateOut:
+        design, playbook = agents.from_template(t.key)
+        return TeamTemplateOut(key=t.key, name=t.name, department=t.department, design=design, playbook=playbook, tags=list(t.tags))
+
+    return TeamCatalogueOut(
+        templates=[template(t) for t in templates.TEMPLATES],
+        tools=[TeamToolOut(key=k, description=tools.CATALOGUE[k][1]) for k in agents.offered_tools()],
+        common_tools=[TeamToolOut(key=k, description=tools.CATALOGUE[k][1]) for k in registry.COMMON_TOOLS if k in tools.CATALOGUE],
+        actions=[TeamActionOut(key=k, label=registry.ACTIONS[k].label, ceiling=registry.ACTIONS[k].ceiling, level="L1", approved_in_a_row=0)
+                 for k in agents.offered_actions()],
+        kpis=[TeamKpiOut(key=k.key, label=k.label) for k in insight_queries.KPIS],
+        departments=registry.departments(), min_job=agents.MIN_JOB, max_rounds=agents.MAX_ROUNDS, max_events=agents.MAX_EVENTS,
+    )
+
+
+@router.post("/agents", response_model=TeamAgentDetailOut)
+def create_team_agent(data: TeamNewAgentIn, ctx: OwnerAdmin, session: AdminDb) -> TeamAgentDetailOut:
+    if data.template and data.template not in templates.BY_KEY:
+        raise ValidationFailed("No such starter template.", code="INVALID_AGENT_DESIGN")
+    try:
+        row = agents.create(session, data.design, by=ctx.admin.email, template=data.template, playbook=data.playbook)
+    except agents.Refused as exc:
+        raise ValidationFailed(str(exc), code="INVALID_AGENT_DESIGN") from exc
+    record(session, ctx.admin, "team.agent_created", target_type="team_agent", target_id=row.key, ip=ctx.ip,
+           metadata={"template": data.template, "design": data.design.model_dump()})
+    return _detail(session, registry.from_row(row))
+
+
+@router.put("/agents/{key}/design", response_model=TeamAgentDetailOut)
+def put_team_design(key: str, data: agents.Design, ctx: OwnerAdmin, session: AdminDb) -> TeamAgentDetailOut:
+    before = agents.get(session, key)
+    if before is None or before.status != "active":
+        raise NotFound("No such agent of yours.", code="AGENT_NOT_FOUND")
+    old = registry.from_row(before)
+    try:
+        row = agents.update(session, key, data, by=ctx.admin.email)
+    except agents.Refused as exc:
+        raise ValidationFailed(str(exc), code="INVALID_AGENT_DESIGN") from exc
+    record(session, ctx.admin, "team.agent_redesigned", target_type="team_agent", target_id=key, ip=ctx.ip,
+           metadata={"before": {"name": old.name, "tools": list(old.tools), "actions": list(old.actions)}, "after": data.model_dump()})
+    return _detail(session, registry.from_row(row))
+
+
+@router.delete("/agents/{key}", response_model=TeamOverviewOut)
+def archive_team_agent(key: str, ctx: OwnerAdmin, session: AdminDb) -> TeamOverviewOut:
+    try:
+        agents.archive(session, key)
+    except agents.Refused as exc:
+        raise NotFound(str(exc), code="AGENT_NOT_FOUND") from exc
+    record(session, ctx.admin, "team.agent_archived", target_type="team_agent", target_id=key, ip=ctx.ip)
+    return _overview(session)
 
 
 @router.get("/agents/{key}", response_model=TeamAgentDetailOut)

@@ -4,8 +4,7 @@ Each agent's settings live in the platform settings (`agents`); these tables hol
 agents did: runs, the events they hand to each other, the actions they propose for the
 owner's approval, their working state and the versions of their playbooks.
 
-Nothing here is a member's data. Later stages add prospects (companies and their contact
-persons from legal notices); those get their own tables and retention.
+Nothing here is a person's data.
 """
 
 from __future__ import annotations
@@ -27,6 +26,34 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base, IdMixin, UTCDateTime
+
+
+class OwnerAgent(Base, IdMixin):
+    """An agent the owner made from the agent template: its design (who it is, what it may use and propose, what wakes
+    it). Its settings — switched on, model, budget, schedule, the tools it actually gets, levels — live with every other
+    agent's in the platform settings (`agents`); its instructions are its playbook (TeamPlaybook)."""
+
+    __tablename__ = "owner_agents"
+
+    key: Mapped[str] = mapped_column(String(40), nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(String(60), nullable=False)
+    department: Mapped[str] = mapped_column(String(40), nullable=False)
+    # Its job in a few sentences: what it is for (every run starts with it).
+    job: Mapped[str] = mapped_column(Text, nullable=False)
+    # How it works, step by step, beyond the rules every agent follows (a starter template brings one).
+    guide: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    tools: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    actions: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    subscribes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    emits: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    kpi: Mapped[str] = mapped_column(String(60), nullable=False, default="")
+    max_rounds: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # The starter template it was made from ("" = from a blank template).
+    template: Mapped[str] = mapped_column(String(40), nullable=False, default="")
+    status: Mapped[str] = mapped_column(String(12), nullable=False, default="active")  # active | archived
+    created_by: Mapped[str] = mapped_column(String(60), nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
 
 
 class TeamRun(Base, IdMixin):

@@ -19,6 +19,7 @@ from ..marketing import video_studio as _video_studio  # noqa: F401 - registers 
 from ..nia import meetings
 from ..product import ideas as _ideas  # noqa: F401 - registers product.idea
 from ..social import posts as _social_posts  # noqa: F401 - registers social.post
+from . import agents as _agents  # noqa: F401 - registers agent.create
 from . import approvals, config, events, registry, runner
 
 

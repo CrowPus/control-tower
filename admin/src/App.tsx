@@ -18,6 +18,7 @@ import { BrainPage } from "./brain/Brain";
 // The 3D office loads its 3D engine only when opened.
 const OfficePage = lazy(() => import("./office/Office").then((m) => ({ default: m.OfficePage })));
 import { AgentDetailPage } from "./team/AgentDetail";
+import { NewAgentPage } from "./team/Design";
 import { ApprovalsPage } from "./team/Approvals";
 import { MailboxesPage } from "./team/Mailboxes";
 import { OutsideAgentPage, OutsidePage } from "./team/Outside";
@@ -331,6 +332,7 @@ export function App() {
                 <Route path="office" element={<Suspense fallback={<p className="text-[13px] text-muted">Opening the office…</p>}><OfficePage /></Suspense>} />
                 <Route path="brain" element={<BrainPage owner={me.admin.role === "owner"} />} />
                 <Route path="team" element={<TeamPage owner={me.admin.role === "owner"} />} />
+                <Route path="team/new" element={me.admin.role === "owner" ? <NewAgentPage /> : <Navigate to="/team" replace />} />
                 <Route path="team/mailboxes" element={<MailboxesPage owner={me.admin.role === "owner"} />} />
                 <Route path="team/outside" element={<OutsidePage owner={me.admin.role === "owner"} />} />
                 <Route path="team/outside/:id" element={<OutsideAgentPage owner={me.admin.role === "owner"} />} />

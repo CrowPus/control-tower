@@ -34,9 +34,35 @@ Each row shows the agent's state (**Off**, **Waiting for settings** with what is
 
 **Nia** (Leadership) is part of every install: your chief of staff — the complete rundown, your directives to the team, the memory of decisions and lessons, meetings and presentations. See [Nia](docs:nia). Every other agent is your own: you create it from the agent template — its name, job, model, instructions, tools, the actions it may propose and how much clearance each needs, when it works and its budget — or copy a starter template. Agents from other providers join through [Outside agents](docs:outside-agents).
 
+## Making an agent (owner)
+
+**New agent** (top of the Team page) opens the gallery: **Blank**, or a starter template (Marketing Lead, Social Media Manager, Graphic Designer, Product Analyst, QA Runner, Engineer on Duty, Researcher, Clearance Watch). A template is only a starting point: change anything before you press **Make the agent**.
+
+- **Name** and **Department** — the department groups it on the Team page and in the office.
+- **Job** — what it is for, in a sentence or two.
+- **How it works** — its method, step by step. Your **playbook** (optional here, and on its page later) says what you want right now.
+- **Tools it may be given** — what it can look at or use. Every agent also has the common tools (the numbers, the team's events, the brain, notes, proposing). You still tick on its page which tools it really gets.
+- **What it may propose** — the kinds of actions it may ask you to clear. *Always you* actions can never run alone.
+- **Woken by these events** / **Events it may send** — handoffs between agents, names like `marketing.brief`.
+- **The number you judge it by** — one of the Insights numbers, or none.
+- **Rounds of tool use per run** — 0 for the team's default, at most 30.
+
+Every design is checked against the rules when you save it; a design that breaks one is not saved, and the message says which rule:
+
+- a job of at least 20 characters, and at least one tool besides the common ones;
+- only tools and actions that exist; never Nia's own tools (deciding clearance, changing the admin, directives, starting or questioning other agents, the browser, Nia's memory) and never *admin change* or *new agent* actions;
+- event names like `marketing.brief`, at most 10 of each; at most 30 rounds.
+
+The rules the agent follows while it works cannot be changed by any design: it only proposes and you clear; money, deleting, settings and agents' instructions are always yours; it stays within its budgets; what it reads is information, never an instruction; the same proposal is never made twice; everything is logged; and the team switch stops it at once.
+
+A new agent starts **Off**. Give it its tools, model, budget and schedule on its page, then switch it on.
+
+**Nia can propose an agent** for you (*A new agent for the team*): it is made only when you clear the card in [Clearance](docs:approvals), and it also starts Off.
+
 ## One agent's page
 
 - **Run now** (owner, when Ready): starts the agent at once. The run appears under Recent runs when it is done.
+- **Design** (your own agents): the agent template as saved. **Change the design** opens it to edit; tools or actions you take away are also removed from its settings. **Take off the team** stops it at once and withdraws its waiting proposals; its runs, proposals and notes stay for the record. Nia's design is part of Control Tower and cannot be changed.
 - **Chat** (owner; at the top of every agent's page except Nia's, who has her own page) — talk to the agent like to a colleague:
   - **New conversation** starts one; earlier conversations are listed, newest first; **Delete** removes one with its files (proposals made in it stay in Clearance).
   - Type and press **Send** (Enter sends, Shift+Enter makes a new line). The agent answers with its own tools, its playbook, what it has learned and your latest decisions on its proposals; every answer shows the tools it used and what it cost.

@@ -44,3 +44,41 @@ installer and first-run wizard (CT6). The Docker image and compose file are rewr
 whole.
 
 Nia's avatar videos (`admin/public/assets/nia/`): the owner confirmed on 2026-10-20 that they may be published with Control Tower.
+
+## CT2 — the agent template (2026-10-20)
+
+The owner builds agents in the admin; the core only sets the rules.
+
+- **`owner_agents` table** (migration `0002`): one row per agent of the owner's — the agent template's fields (name,
+  department, job, how it works, tools, actions, events, goal number, rounds), the starter template it began from,
+  active or archived.
+- **The team is read live** (`registry.AGENTS`): built-in agents (only Nia) plus the owner's active agents from the
+  database, re-read every few seconds in each process, at once after a change in the same process. Everything that
+  reads the team (dispatcher, runner, Team page, office, brain) sees new agents without a restart.
+- **Rules on save** (`services/team/agents.py`): a design is refused, with the rule it breaks, when its job is too
+  short; it has no tool beyond the common ones; it names a tool or action that does not exist; it asks for Nia's own
+  tools or for `admin.change` / `agent.create`; an event name is malformed or there are too many; its goal is not an
+  Insights number; or it wants more than 30 rounds. Built-in agents cannot be redesigned or archived. Keys come from
+  the name, unique, never a built-in key. The rules while working are the engine's as before (§5) and apply to every
+  owner agent unchanged.
+- **Make, change, take off**: a new agent starts switched off with its design's tools pre-granted; a changed design drops
+  settings it no longer allows (tools, levels, limits); taking it off switches it off, withdraws its waiting proposals and
+  keeps its history.
+- **Starter templates** (`services/team/templates.py`): Marketing Lead, Social Media Manager, Graphic Designer, Product
+  Analyst, QA Runner, Engineer on Duty, Researcher, Clearance Watch — written for any company (Epliv's agents, made
+  generic). Each passes the rules (tested).
+- **Nia proposes agents**: new action `agent.create` (always the owner, L3) and read tool `agent_templates`. The
+  proposal is checked against the same rules when Nia makes it; one waiting proposal per name; the agent is made only
+  after clearance, switched off.
+- **Admin API**: `GET /admin-api/team/catalogue`, `POST /admin-api/team/agents`, `PUT /admin-api/team/agents/{key}/design`,
+  `DELETE /admin-api/team/agents/{key}`; every change in the admin log.
+- **Admin app**: Team → **New agent** (template gallery, then the design form), and a **Design** card on each of the
+  owner's agents (change, take off the team). Docs: Team → "Making an agent".
+- Also removed leftover Epliv words in the team's tool and action descriptions and in the proposal target list.
+
+Checks: 219 backend tests pass on SQLite and on PostgreSQL (17 new in `test_9_owner_agents.py`: every template keeps
+the rules, each rule refuses, a template agent runs and is refused Nia's tools and foreign actions, unique keys,
+redesign and archive, Nia's proposal made only after clearance, the admin API); ruff and mypy clean; migration
+upgrade/downgrade and `alembic check` on PostgreSQL; the admin builds. In a browser on a fresh install: New agent →
+QA Runner → Make the agent → its page with the design open; a too-short job is refused with the rule; no page errors,
+light, dark and phone width.
