@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.png">
-    <img src="docs/images/logo.png" alt="Control Tower" width="420">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/CrowPus/control-tower/main/docs/images/logo-dark.png">
+    <img src="https://raw.githubusercontent.com/CrowPus/control-tower/main/docs/images/logo.png" alt="Control Tower" width="420">
   </picture>
 </p>
 
