@@ -43,6 +43,4 @@ Not yet done (later stages): the agent template and starter templates (CT2), the
 installer and first-run wizard (CT6). The Docker image and compose file are rewritten but not yet built and run as a
 whole.
 
-Open for the owner: Nia's avatar videos (`admin/public/assets/nia/`) came from Epliv/Rolelyq, and Epliv's notes said
-the source frames are not licensed for reuse outside Rolelyq — confirm they may be published under AGPL before the
-repo goes public, or replace them.
+Nia's avatar videos (`admin/public/assets/nia/`): the owner confirmed on 2026-10-20 that they may be published with Control Tower.
