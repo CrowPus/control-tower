@@ -1,4 +1,9 @@
-<p align="center"><img src="docs/images/logo.png" alt="Control Tower" width="420"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.png">
+    <img src="docs/images/logo.png" alt="Control Tower" width="420">
+  </picture>
+</p>
 
 # Control Tower
 

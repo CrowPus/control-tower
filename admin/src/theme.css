@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /* Control Tower's design tokens: runtime variables so light and dark are both real themes; Tailwind utilities reference
-   them through @theme inline. The primary colour is the logo's purple, the accent its green (brand/mark.png). */
+   them through @theme inline. The primary colour is the logo's purple (brand/mark.png, and brand/mark-dark.png's lighter purple on
+   dark), the accent its green. */
 :root {
   --bg: #fafafa;
   --surface: #ffffff;
@@ -40,11 +41,11 @@
   --fg: #f7f8f8;
   --fg-muted: #8a8f98;
   --fg-subtle: #62666d;
-  /* A lighter purple on dark, readable as text; buttons carry dark text on it. */
-  --primary: #a78bfa;
-  --primary-hover: #c4b5fd;
+  /* The dark logo's lighter purple, readable as text; buttons carry dark text on it. */
+  --primary: #9b7ffa;
+  --primary-hover: #b8a4fb;
   --primary-fg: #1a0b45;
-  --primary-soft: rgba(167, 139, 250, 0.16);
+  --primary-soft: rgba(155, 127, 250, 0.16);
   --accent: #08eb90;
   --success: #3fbf5f;
   --success-soft: rgba(39, 166, 68, 0.18);
@@ -54,7 +55,7 @@
   --danger-soft: rgba(239, 68, 68, 0.18);
   --info: #7dd3fc;
   --info-soft: rgba(56, 189, 248, 0.14);
-  --focus-ring: rgba(167, 139, 250, 0.5);
+  --focus-ring: rgba(155, 127, 250, 0.5);
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
   color-scheme: dark;
 }

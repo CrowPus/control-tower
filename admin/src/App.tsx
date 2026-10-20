@@ -36,6 +36,16 @@ import type { components } from "./schema";
 
 export type Me = components["schemas"]["MeOut"];
 
+/** The logo's mark: the bright version on light pages, the dark version on dark ones (the theme decides). */
+function Mark({ className }: { className: string }) {
+  return (
+    <>
+      <img src="/brand/mark.png" alt="" className={cn("logo-light", className)} />
+      <img src="/brand/mark-dark.png" alt="" className={cn("logo-dark", className)} />
+    </>
+  );
+}
+
 function useMe() {
   return useQuery({
     queryKey: ["me"],
@@ -55,7 +65,7 @@ function Frame({ title, children, footer }: { title: string; children: ReactNode
     <div className="grid min-h-screen place-items-center bg-bg px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="mb-5 flex items-center gap-2">
-          <img src="/brand/mark.png" alt="" className="h-8 w-8" />
+          <Mark className="h-8 w-8" />
           <div>
             <p className="text-[15px] font-semibold text-fg">Control Tower</p>
             <p className="text-xs text-muted">Restricted area. Every action is logged.</p>
@@ -236,7 +246,7 @@ function Shell({ me, children }: { me: Me; children: ReactNode }) {
     <div className="min-h-screen bg-bg md:grid md:grid-cols-[220px_1fr]">
       <aside className="border-b border-border bg-surface md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-b-0 md:border-r">
         <div className="flex items-center gap-2 px-4 py-4">
-          <img src="/brand/mark.png" alt="" className="h-7 w-7" />
+          <Mark className="h-7 w-7" />
           <div className="min-w-0">
             <p className="text-[13px] font-semibold text-fg">Control Tower</p>
             <p className="truncate text-[11px] text-muted">{me.admin.email} · {me.admin.role}</p>

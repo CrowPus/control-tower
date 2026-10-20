@@ -24,6 +24,11 @@
   --viz-crosshair: #8a8f98;
 }
 
+/* Two logos: one for light pages, one for dark (the .dark class follows the theme). */
+.logo-dark { display: none; }
+.dark .logo-light { display: none; }
+.dark .logo-dark { display: inline-block; }
+
 /* Nia points at what it talks about while presenting (data-nia markers). */
 .nia-highlight {
   outline: 3px solid var(--color-primary, #33019d);
