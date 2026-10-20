@@ -7,7 +7,7 @@ the same Plugin a Python plugin would define, whose parts call the project:
     POST <base>/actions/<action>/check       {"payload": {...}}                            → {"problems": [...]}
     POST <base>/actions/<action>/recheck     {"payload": {...}}                            → {"problems": [...]}
     POST <base>/actions/<action>/execute     {"payload": {...}, "approval_id": 12}        → any JSON object
-    GET  <base>/metrics                      → {"values": {"<metric>": 12, "<metric>": {"<dimension>": 3}}}
+    GET  <base>/metrics?since=<ISO time>     → {"values": {"<metric>": 12, "<metric>": {"<dimension>": 3}}}  (today = since then)
 
 Every request is signed with the connection's secret (signing.py); the project must refuse an unsigned or stale one.
 `execute` is called once per cleared proposal; the approval id lets the project refuse a repeat.
@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import time
 from typing import Any, Literal
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 
 import httpx
 from pydantic import BaseModel, Field, ValidationError
@@ -95,6 +95,16 @@ class Manifest(BaseModel):
     metrics: list[_Metric] = Field(default_factory=list, max_length=30)
     templates: list[_Template] = Field(default_factory=list, max_length=20)
     personal: list[str] = Field(default_factory=list, max_length=100)
+
+
+def _day_start() -> str:
+    """The start of the owner's day (their time zone), as UTC ISO 8601: what "today" means for the project's numbers."""
+    from datetime import UTC, datetime
+
+    from ...core.clock import zone
+
+    local = datetime.now(zone()).replace(hour=0, minute=0, second=0, microsecond=0)
+    return local.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def base_url(value: str) -> str:
@@ -181,7 +191,7 @@ def build(key: str, url: str, raw: dict[str, Any]) -> Plugin:
     def metric(x: _Metric) -> Metric:
         def read(_ctx: Any) -> Any:
             if time.monotonic() - cache["at"] > METRICS_CACHE_SECONDS:
-                cache["values"] = _request("GET", f"{url}/metrics", core.secret(key)).get("values") or {}
+                cache["values"] = _request("GET", f"{url}/metrics?since={quote(_day_start())}", core.secret(key)).get("values") or {}
                 cache["at"] = time.monotonic()
             if x.key not in cache["values"]:
                 raise ValueError("the project's /metrics has no value for it")

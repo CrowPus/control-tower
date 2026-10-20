@@ -116,8 +116,10 @@ are JSON. Every request from Control Tower is **signed**; refuse any request who
 | `POST /actions/<action>/check` | `{"payload": {...}}` | `{"problems": ["…"]}` (empty: fine) |
 | `POST /actions/<action>/recheck` | `{"payload": {...}}` | `{"problems": [...]}` |
 | `POST /actions/<action>/execute` | `{"payload": {...}, "approval_id": 12}` | any JSON object (the result) |
-| `GET /metrics` | — | `{"values": {"<metric>": 41, "<metric>": {"<dimension>": 3}}}` |
+| `GET /metrics?since=<ISO time>` | — | `{"values": {"<metric>": 41, "<metric>": {"<dimension>": 3}}}` |
 
+`since` is the start of the owner's day in their time zone (UTC, e.g. `2026-10-20T22:00:00Z`): a number that counts
+what happens (sign-ups) counts from then; a total (users) ignores it. The signature covers the path without the query.
 An answer with status 400 or more counts as failed; put the reason in `{"error": "…"}`. Answer within 15 seconds and
 under 2 MB. Control Tower calls `execute` once per cleared proposal; still, refuse an `approval_id` you have carried
 out already (answer 409) — that makes a repeat harmless.

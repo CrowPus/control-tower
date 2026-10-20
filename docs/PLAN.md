@@ -1,6 +1,6 @@
 # Control Tower — plan
 
-Status: **approved 2026-10-20** — the owner agreed to every decision in §11. CT0–CT3, CT5 and CT6 done, and the release docs of CT8: ready for CT4 (Zelyq, when the owner has cloned it). See BUILD_LOG.md.
+Status: **approved 2026-10-20** — the owner agreed to every decision in §11. CT0–CT3, CT5 and CT6 done, and the release docs of CT8: CT4 done: Zelyq connected (branch control-tower in the owner's clone, not pushed). See BUILD_LOG.md.
 
 ## 1. What it is
 
@@ -136,7 +136,7 @@ Search Console / analytics. With these alone the common starter templates alread
 | CT1 | Core taken from Epliv, business code removed, runs empty | **Done 2026-10-20** |
 | CT2 | Agent template + rules in the core; hard-coded agents become starter templates | **Done 2026-10-20** |
 | CT3 | Plugin interface (Signals, Records, Actions, pages, templates), versioned and documented, plus the HTTP connector | **Done 2026-10-20** |
-| CT4 | Zelyq (a fresh clone) as the first project on the core; Epliv is not touched | Zelyq's agents work on Control Tower (the proof) |
+| CT4 | Zelyq (a fresh clone) as the first project on the core; Epliv is not touched | **Done 2026-10-20** — connected over HTTP, tested end to end |
 | CT5 | Ready-made plugins: Stripe, read-only database, mailbox, social | **Done 2026-10-20** (Stripe and Database as plugins; the mailbox and social networks are in the core) |
 | CT6 | Installer, first-run wizard, updates with backup, provider choice | **Done 2026-10-20** |
 | CT7 | Role365 on the core as the second project | Two different businesses on one core |

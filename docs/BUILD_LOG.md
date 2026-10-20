@@ -163,3 +163,26 @@ ready plugins), Admin → Docs (Getting started, Platform → AI, Plugins → Re
 
 Checks: backend tests on SQLite and PostgreSQL (new: providers, setup, Stripe, Database); ruff, mypy and shellcheck
 clean; the admin builds; browser checks of Getting started, the AI card and Plugins without page errors.
+
+## CT4 — Zelyq, the first project (2026-10-20)
+
+The owner's choice: a fresh clone of Zelyq (github.com/CrowPus/zelyq, in ~/zelyq), not Epliv. Zelyq is a TypeScript
+monorepo (Fastify server, Drizzle over SQLite or PostgreSQL), so it connects over HTTP.
+
+**In Zelyq** (branch `control-tower`, commit a237443, local only): `/control-tower` — manifest, six read-only tools
+(overview, newest users, projects, failed runs, deployments, audit log), six numbers, one action (re-run a failed
+pipeline run, L2, checked when proposed, rechecked while waiting and again before it runs; it runs as the account in
+`CONTROL_TOWER_ACTS_AS`, so Zelyq's roles and audit log apply), two starter agents, and events (sign-up, pipeline
+failed, deploy failed). Reads go through a new portable repository (`packages/db/src/repositories/insights.ts`), as
+Zelyq's rule asks. Signed both ways; off unless `CONTROL_TOWER_SECRET` is set; events never make Zelyq wait.
+Docs: `docs/control-tower.md`, `.env.example`. Tests: 5 new, pass; Zelyq's whole server suite fails the same 69 tests
+with and without the change (they need git, ssh and Docker, which the test container does not have).
+
+**In Control Tower**: `/metrics` is now asked with `?since=<the start of the owner's day>`, so a project counts "today"
+in the owner's time zone (docs/PLUGINS.md).
+
+**End to end**, both running for real on one private network: Control Tower connected to Zelyq with a shared secret,
+fetched its manifest (6 tools, 1 action, 6 numbers, 2 templates), switched it on; the newest users view came back with
+e-mail and name hidden; numbers were collected into Insights; a sign-up in Zelyq arrived as the event `zelyq.signup`;
+an agent was made from the Release Guard template; a proposal to re-run a run that does not exist was refused by
+Zelyq's own check.
