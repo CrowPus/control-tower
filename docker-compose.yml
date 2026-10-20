@@ -51,7 +51,7 @@ services:
     build: { context: ., dockerfile: Dockerfile }
     ports: ["${APP_BIND:-127.0.0.1}:${APP_PORT:-8000}:8000"]
     environment: *app_env
-    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro"]
+    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro", "./plugins:/app/plugins:ro"]
     # The owner watches and takes over Nia's browser through the admin.
     networks: [default, browser]
     depends_on:
@@ -70,7 +70,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro"]
+    volumes: ["appdata:/data", "marketing:/marketing", "${TLS_DIR:-./tls}/ca.crt:/tls/ca.crt:ro", "./plugins:/app/plugins:ro"]
     # Nia's browser is reachable only on its own network.
     networks: [default, browser]
     depends_on:

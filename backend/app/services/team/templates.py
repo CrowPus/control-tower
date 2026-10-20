@@ -1,5 +1,5 @@
 """Starter templates: ready designs the owner copies, edits or ignores. None of them runs until the owner makes an agent
-from it (Admin → Team → New agent) and switches it on with its settings. A plugin may add its own (stage CT3).
+from it (Admin → Team → New agent) and switches it on with its settings. A plugin adds its own (services/plugins).
 
 Each one is a complete agent design for any company: its job, how it works, the tools it may be given and the actions
 it may propose. The company itself — what it does and for whom — comes from the brand kit's "About", which every
@@ -118,4 +118,13 @@ TEMPLATES: tuple[Template, ...] = (
         tools=("approvals_waiting", "team_overview", "incidents"), emits=("compliance.issue",), tags=("trust",)),
 )
 
-BY_KEY = {t.key: t for t in TEMPLATES}
+# Every template by key: the core's and the switched-on plugins' (`<plugin>.<key>`, services/plugins).
+BY_KEY: dict[str, Template] = {t.key: t for t in TEMPLATES}
+
+
+def offered() -> list[Template]:
+    """The templates the owner may start from now: the core's, then those of plugins that are switched on."""
+    from ..plugins import core as plugins
+
+    plugins.ensure()
+    return [t for t in BY_KEY.values() if not plugins.is_off(t.key)]

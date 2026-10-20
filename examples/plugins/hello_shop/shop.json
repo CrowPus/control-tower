@@ -1,0 +1,12 @@
+{
+  "products": [
+    {"id": "p1", "name": "Canvas tote", "price_usd": 24.0, "stock": 31},
+    {"id": "p2", "name": "Enamel mug", "price_usd": 16.0, "stock": 4},
+    {"id": "p3", "name": "Linen apron", "price_usd": 38.0, "stock": 0}
+  ],
+  "orders": [
+    {"id": "o-1001", "day": "today", "product": "p1", "quantity": 2, "email": "ana@example.com", "country": "PT"},
+    {"id": "o-1002", "day": "today", "product": "p2", "quantity": 1, "email": "ben@example.com", "country": "DE"},
+    {"id": "o-1003", "day": "yesterday", "product": "p1", "quantity": 1, "email": "chi@example.com", "country": "NG"}
+  ]
+}

@@ -18,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ...models import OwnerAgent, TeamApproval
+from ..plugins import core as plugins
 from . import approvals, config, registry
 from . import templates as starter
 
@@ -65,11 +66,14 @@ def offered_tools() -> list[str]:
     """Every tool the template offers: the catalogue without the common ones (every agent has those) and Nia's own."""
     from . import tools
 
-    return sorted(t for t in tools.CATALOGUE if t not in NIA_ONLY_TOOLS and t not in registry.COMMON_TOOLS and t not in tools.ALWAYS)
+    plugins.ensure()
+    return sorted(t for t in tools.CATALOGUE
+                  if t not in NIA_ONLY_TOOLS and t not in registry.COMMON_TOOLS and t not in tools.ALWAYS and not plugins.is_off(t))
 
 
 def offered_actions() -> list[str]:
-    return sorted(a for a in registry.ACTIONS if a not in NIA_ONLY_ACTIONS and a not in registry.COMMON_ACTIONS)
+    plugins.ensure()
+    return sorted(a for a in registry.ACTIONS if a not in NIA_ONLY_ACTIONS and a not in registry.COMMON_ACTIONS and not plugins.is_off(a))
 
 
 def check(design: Design, *, key: str = "") -> list[str]:
@@ -91,7 +95,7 @@ def check(design: Design, *, key: str = "") -> list[str]:
     forbidden = sorted(set(design.actions) & NIA_ONLY_ACTIONS)
     if forbidden:
         problems.append(f"No agent of yours may propose: {', '.join(forbidden)}.")
-    unknown = sorted(set(design.actions) - set(registry.ACTIONS))
+    unknown = sorted(set(design.actions) - set(offered_actions()) - set(registry.COMMON_ACTIONS) - NIA_ONLY_ACTIONS)
     if unknown:
         problems.append(f"No such action: {', '.join(unknown)}.")
     if design.actions and "propose" not in [*design.tools, *registry.COMMON_TOOLS]:
@@ -131,7 +135,7 @@ def _spec(key: str, design: Design) -> registry.Agent:
 def from_template(key: str) -> tuple[Design, str]:
     """A starter template as an editable design, and its first playbook."""
     t = starter.BY_KEY.get(key)
-    if t is None:
+    if t is None or t not in starter.offered():
         raise Refused(f"No starter template called {key!r}.")
     return Design(name=t.name, department=t.department, job=t.job, guide=t.guide, tools=list(t.tools), actions=list(t.actions),
                   subscribes=list(t.subscribes), emits=list(t.emits), kpi=t.kpi, max_rounds=t.max_rounds), t.playbook

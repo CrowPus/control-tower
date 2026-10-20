@@ -635,7 +635,7 @@ def _agent_templates(_ctx: Context) -> dict[str, Any]:
 
     return {
         "templates": [{"key": t.key, "name": t.name, "department": t.department, "job": t.job, "tools": list(t.tools), "actions": list(t.actions),
-                       "subscribes": list(t.subscribes), "emits": list(t.emits), "kpi": t.kpi} for t in templates.TEMPLATES],
+                       "subscribes": list(t.subscribes), "emits": list(t.emits), "kpi": t.kpi} for t in templates.offered()],
         "tools": {k: CATALOGUE[k][1] for k in agents.offered_tools()},
         "every_agent_has": list(registry.COMMON_TOOLS),
         "actions": {k: registry.ACTIONS[k].label for k in agents.offered_actions()},
@@ -921,7 +921,10 @@ ALWAYS = ("proposal_status",)
 
 def usable(agent: registry.Agent, granted: list[str]) -> tuple[str, ...]:
     """The tools an agent may use in a run: in its design, granted by the owner, and built — and the ones it always has."""
-    mine = tuple(t for t in registry.tools_of(agent) if t in granted and t in CATALOGUE)
+    from ..plugins import core as plugins
+
+    plugins.ensure()
+    mine = tuple(t for t in registry.tools_of(agent) if t in granted and t in CATALOGUE and not plugins.is_off(t))
     return mine + tuple(t for t in ALWAYS if t not in mine)
 
 

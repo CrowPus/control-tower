@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, BarChart3, UserRound, Bot, ClipboardList, Cpu, Gauge, Inbox, ListChecks, LogOut, Mail, Server, ShieldCheck, SlidersHorizontal, Sparkles, BookOpen, Mailbox, Megaphone, Network, Building, FlaskConical, ShieldAlert } from "lucide-react";
+import { Activity, BarChart3, UserRound, Bot, ClipboardList, Cpu, Gauge, Inbox, ListChecks, LogOut, Mail, Server, ShieldCheck, SlidersHorizontal, Sparkles, BookOpen, Mailbox, Megaphone, Network, Building, FlaskConical, ShieldAlert, Plug } from "lucide-react";
 import { Suspense, lazy, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, Navigate, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 import { NotificationBell, type BellItem } from "./Bell";
@@ -23,6 +23,7 @@ import { ApprovalsPage } from "./team/Approvals";
 import { MailboxesPage } from "./team/Mailboxes";
 import { OutsideAgentPage, OutsidePage } from "./team/Outside";
 import { TeamPage } from "./team/Team";
+import { PluginsPage } from "./pages/Plugins";
 import { api, errorMessage, onSignedOut, setCsrfToken, unwrap } from "./api";
 import { AdminLogPage } from "./pages/AdminLog";
 import { AdminsPage } from "./pages/Admins";
@@ -231,6 +232,7 @@ const NAV = [
   { to: "/overview", label: "Live overview", icon: Gauge },
   { to: "/tasks", label: "Task queue", icon: ListChecks },
   { to: "/usage", label: "AI usage", icon: Cpu },
+  { to: "/plugins", label: "Plugins", icon: Plug },
   { to: "/platform", label: "Platform", icon: SlidersHorizontal },
   { to: "/system", label: "System health", icon: Server },
   { to: "/email-deliveries", label: "E-mails", icon: Mail },
@@ -331,6 +333,7 @@ export function App() {
                 <Route path="nia/browser" element={<BrowserPage owner={me.admin.role === "owner"} />} />
                 <Route path="office" element={<Suspense fallback={<p className="text-[13px] text-muted">Opening the office…</p>}><OfficePage /></Suspense>} />
                 <Route path="brain" element={<BrainPage owner={me.admin.role === "owner"} />} />
+                <Route path="plugins" element={<PluginsPage owner={me.admin.role === "owner"} />} />
                 <Route path="team" element={<TeamPage owner={me.admin.role === "owner"} />} />
                 <Route path="team/new" element={me.admin.role === "owner" ? <NewAgentPage /> : <Navigate to="/team" replace />} />
                 <Route path="team/mailboxes" element={<MailboxesPage owner={me.admin.role === "owner"} />} />

@@ -104,6 +104,13 @@ class InsightSettings(BaseModel):
     alerts: dict[str, float] = Field(default_factory=dict)
 
 
+def _plugin_kpis() -> tuple[str, ...]:
+    from ..services.plugins import core as plugins
+
+    plugins.ensure()
+    return tuple(k for key, loaded in sorted(plugins.LOADED.items()) if plugins.enabled(key) for k in loaded.kpis)
+
+
 def _kpis(session: Any, keys: tuple[str, ...], days: int) -> list[InsightKpi]:
     return [InsightKpi(**queries.kpi(session, queries.BY_KEY[k], days)) for k in keys]
 
@@ -127,7 +134,8 @@ def today(ctx: CurrentAdmin, session: AdminDb, days: int = Days) -> InsightToday
     return InsightTodayOut(
         days=days,
         north_star=_kpis(session, ("cleared",), days)[0],
-        kpis=_kpis(session, ("agent_runs", "proposals", "rejected", "ai_cost", "server_errors"), days),
+        # The install's numbers, then those of every switched-on plugin.
+        kpis=_kpis(session, ("agent_runs", "proposals", "rejected", "ai_cost", "server_errors", *_plugin_kpis()), days),
         activity=_series(session, [("agents.runs", "*"), ("clearance.proposed", "")], days),
         alerts=[InsightAlertOut(**a) for a in queries.alerts(session, 7) if a["resolved_at"] is None],
         data_since=first.isoformat() if first else None,

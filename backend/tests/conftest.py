@@ -42,6 +42,8 @@ os.environ.update(
         "REDIS_URL": "",
         "LOG_JSON": "false",
         "LOG_LEVEL": "WARNING",
+        # The example plugin (examples/plugins/hello_shop) is this suite's Python plugin.
+        "PLUGINS_DIR": str(Path(__file__).resolve().parents[2] / "examples" / "plugins"),
     }
 )
 

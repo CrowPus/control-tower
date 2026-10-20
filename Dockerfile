@@ -13,10 +13,12 @@ COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --locked --all-extras --no-dev
 COPY backend/ ./
 COPY --from=admin /app/dist-admin /app/dist-admin
+# The install's Python plugins (docker-compose mounts ./plugins over it, so adding one needs no new image).
+COPY plugins /app/plugins
 # /data: the install's files; /marketing: the videos the studio made, their own volume.
 RUN useradd --uid 10001 --create-home app && mkdir -p /data /marketing && chown app:app /data /marketing
 USER app
-ENV DATA_DIR=/data ADMIN_FRONTEND_DIST=/app/dist-admin MARKETING_DIR=/marketing
+ENV DATA_DIR=/data ADMIN_FRONTEND_DIST=/app/dist-admin MARKETING_DIR=/marketing PLUGINS_DIR=/app/plugins
 VOLUME ["/data"]
 EXPOSE 8000
 HEALTHCHECK CMD ["/app/backend/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/admin-api/health', timeout=3)"]

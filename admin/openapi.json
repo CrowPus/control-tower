@@ -1701,6 +1701,52 @@
         "title": "CodeIn",
         "type": "object"
       },
+      "CollectOut": {
+        "properties": {
+          "problems": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Problems",
+            "type": "object"
+          }
+        },
+        "required": [
+          "problems"
+        ],
+        "title": "CollectOut",
+        "type": "object"
+      },
+      "ConnectionIn": {
+        "properties": {
+          "base_url": {
+            "maxLength": 500,
+            "title": "Base Url",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 24,
+            "minLength": 2,
+            "title": "Key",
+            "type": "string"
+          },
+          "secret": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "base_url"
+        ],
+        "title": "ConnectionIn",
+        "type": "object"
+      },
       "ContactOut": {
         "properties": {
           "address": {
@@ -6283,6 +6329,319 @@
         "title": "PlatformOut",
         "type": "object"
       },
+      "PluginChangeIn": {
+        "properties": {
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "values": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Values",
+            "type": "object"
+          }
+        },
+        "title": "PluginChangeIn",
+        "type": "object"
+      },
+      "PluginOut": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/PluginPartOut"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "api": {
+            "title": "Api",
+            "type": "string"
+          },
+          "collect_errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Collect Errors",
+            "type": "array"
+          },
+          "collected_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collected At"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/PluginPartOut"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "personal": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Personal",
+            "type": "array"
+          },
+          "secret_set": {
+            "title": "Secret Set",
+            "type": "boolean"
+          },
+          "settings": {
+            "items": {
+              "$ref": "#/components/schemas/PluginSettingOut"
+            },
+            "title": "Settings",
+            "type": "array"
+          },
+          "source": {
+            "enum": [
+              "python",
+              "http"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/PluginPartOut"
+            },
+            "title": "Templates",
+            "type": "array"
+          },
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/PluginPartOut"
+            },
+            "title": "Tools",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "views": {
+            "items": {
+              "$ref": "#/components/schemas/PluginPartOut"
+            },
+            "title": "Views",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "version",
+          "api",
+          "description",
+          "source",
+          "location",
+          "enabled",
+          "missing",
+          "secret_set",
+          "personal",
+          "tools",
+          "views",
+          "actions",
+          "metrics",
+          "templates",
+          "settings",
+          "warnings",
+          "collected_at",
+          "collect_errors"
+        ],
+        "title": "PluginOut",
+        "type": "object"
+      },
+      "PluginPartOut": {
+        "properties": {
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "PluginPartOut",
+        "type": "object"
+      },
+      "PluginProblemOut": {
+        "properties": {
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "location": {
+            "title": "Location",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "python",
+              "http"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "source",
+          "location",
+          "error"
+        ],
+        "title": "PluginProblemOut",
+        "type": "object"
+      },
+      "PluginSettingOut": {
+        "properties": {
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "secret": {
+            "title": "Secret",
+            "type": "boolean"
+          },
+          "set": {
+            "title": "Set",
+            "type": "boolean"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "hint",
+          "secret",
+          "required",
+          "set"
+        ],
+        "title": "PluginSettingOut",
+        "type": "object"
+      },
+      "PluginsOut": {
+        "properties": {
+          "events_address": {
+            "title": "Events Address",
+            "type": "string"
+          },
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/PluginOut"
+            },
+            "title": "Plugins",
+            "type": "array"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/PluginProblemOut"
+            },
+            "title": "Problems",
+            "type": "array"
+          }
+        },
+        "required": [
+          "plugins",
+          "problems",
+          "events_address"
+        ],
+        "title": "PluginsOut",
+        "type": "object"
+      },
       "PostChangeIn": {
         "properties": {
           "scheduled_at": {
@@ -6768,6 +7127,24 @@
           "outdated"
         ],
         "title": "ReviewNote",
+        "type": "object"
+      },
+      "SecretOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "secret": {
+            "title": "Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "secret"
+        ],
+        "title": "SecretOut",
         "type": "object"
       },
       "SendIn": {
@@ -9341,6 +9718,20 @@
           "posts"
         ],
         "title": "VideoOut",
+        "type": "object"
+      },
+      "ViewOut": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "ViewOut",
         "type": "object"
       },
       "VoiceSettings": {
@@ -16056,6 +16447,339 @@
         "summary": "Put Platform",
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/admin-api/plugins": {
+      "get": {
+        "operationId": "list_plugins_admin_api_plugins_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Plugins",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/connections": {
+      "post": {
+        "operationId": "add_connection_admin_api_plugins_connections_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Connection",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/connections/{key}": {
+      "delete": {
+        "operationId": "remove_connection_admin_api_plugins_connections__key__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Connection",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/connections/{key}/fetch": {
+      "post": {
+        "operationId": "fetch_manifest_admin_api_plugins_connections__key__fetch_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fetch Manifest",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/{key}": {
+      "put": {
+        "operationId": "change_plugin_admin_api_plugins__key__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginChangeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change Plugin",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/{key}/collect": {
+      "post": {
+        "operationId": "collect_now_admin_api_plugins__key__collect_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Collect Now",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/{key}/secret": {
+      "post": {
+        "operationId": "renew_secret_admin_api_plugins__key__secret_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Renew Secret",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/{key}/views/{tool}": {
+      "post": {
+        "operationId": "open_view_admin_api_plugins__key__views__tool__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "tool",
+            "required": true,
+            "schema": {
+              "title": "Tool",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open View",
+        "tags": [
+          "admin-plugins"
         ]
       }
     },

@@ -24,7 +24,7 @@ from fastapi.responses import JSONResponse, Response
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from . import public_media, runtime
+from . import plugin_events, public_media, runtime
 from .admin.brain_routes import router as brain_router
 from .admin.docs_routes import router as docs_router
 from .admin.insights_routes import router as insights_router
@@ -34,6 +34,7 @@ from .admin.nia_routes import router as nia_router
 from .admin.office_routes import router as office_router
 from .admin.outside_routes import router as outside_router
 from .admin.oversight_routes import router as oversight_router
+from .admin.plugin_routes import router as plugin_router
 from .admin.product_routes import router as product_router
 from .admin.routes import router
 from .admin.social_routes import router as social_router
@@ -49,8 +50,8 @@ from .services.outside import gateway as outside_gateway
 log = get_logger(__name__)
 
 # Reachable from anywhere (outside agents, OAuth clients, the social networks fetching media): never behind the
-# admin's IP allowlist. Each checks its own credential or token.
-PUBLIC_PREFIXES = ("/agent-gateway/", "/.well-known/oauth-", public_media.PREFIX)
+# admin's IP allowlist. Each checks its own credential, token or signature (a connected project's events).
+PUBLIC_PREFIXES = ("/agent-gateway/", "/.well-known/oauth-", public_media.PREFIX, plugin_events.PREFIX)
 
 
 @asynccontextmanager
@@ -60,11 +61,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     log_event(log, "control tower started", execution_mode=cfg.execution_mode)
     from .db import transaction
     from .services.insights.collector import COLLECTOR
+    from .services.plugins import core as plugins
     from .workers import (
         handlers as _handlers,  # noqa: F401 - registers every task handler, worker or not
     )
 
     COLLECTOR.start(lambda: transaction(write=True))
+    # The Python plugins load now, so a broken one is in the log at once (and on Admin → Plugins).
+    plugins.ensure()
     if cfg.execution_mode != "test":
         runtime.start_embedded(worker=cfg.embedded_worker, scheduler=cfg.embedded_scheduler)
     try:
@@ -176,7 +180,7 @@ def create_app() -> FastAPI:
 
     for each in (router, insights_router, team_router, nia_router, brain_router, office_router, mail_router, social_router,
                  product_router, oversight_router, nia_browser_router, docs_router, outside_router,
-                 outside_gateway.router, public_media.router):
+                 plugin_router, outside_gateway.router, public_media.router, plugin_events.router):
         app.include_router(each)
     mount_frontend(app, cfg.admin_frontend_dist, api_prefix="admin-api")
     return app

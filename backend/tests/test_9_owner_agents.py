@@ -50,7 +50,7 @@ def clean() -> Iterator[None]:
 
 
 def test_every_starter_template_keeps_the_rules_and_offers_only_real_tools() -> None:
-    assert len(templates.TEMPLATES) >= 6 and len(templates.BY_KEY) == len(templates.TEMPLATES)
+    assert len(templates.TEMPLATES) >= 6 and all(templates.BY_KEY[t.key] is t for t in templates.TEMPLATES)
     for t in templates.TEMPLATES:
         design, _playbook = agents.from_template(t.key)
         assert agents.check(design) == [], t.key
@@ -155,13 +155,13 @@ def test_nia_proposes_an_agent_and_it_is_made_only_when_the_owner_clears_it() ->
 
 def test_the_agent_templates_tool_shows_what_an_agent_can_be_made_of() -> None:
     out = tools.CATALOGUE["agent_templates"][0](None)
-    assert {t["key"] for t in out["templates"]} == set(templates.BY_KEY)
+    assert {t["key"] for t in out["templates"]} == {t.key for t in templates.offered()}
     assert "decide_approvals" not in out["tools"] and "incidents" in out["tools"] and "cleared" in out["kpis"]
 
 
 def test_the_owner_makes_changes_and_archives_agents_in_the_admin(admin: Any) -> None:  # noqa: F811
     catalogue = admin.get("/admin-api/team/catalogue").json()
-    assert {t["key"] for t in catalogue["templates"]} == set(templates.BY_KEY) and catalogue["min_job"] == agents.MIN_JOB
+    assert {t["key"] for t in catalogue["templates"]} == {t.key for t in templates.offered()} and catalogue["min_job"] == agents.MIN_JOB
     assert "browse" not in {t["key"] for t in catalogue["tools"]} and "agent.create" not in {a["key"] for a in catalogue["actions"]}
     refused = admin.post("/admin-api/team/agents", json={"design": {**_design().model_dump(), "tools": ["run_agent"]}})
     assert refused.status_code == 422 and "Only Nia" in refused.text

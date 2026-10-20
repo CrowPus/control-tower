@@ -184,7 +184,10 @@ def _read_owned() -> dict[str, Agent]:
 
     from ...db import transaction
     from ...models import OwnerAgent
+    from ..plugins import core as plugins
 
+    # The plugins' parts (tools, actions, templates) follow the owner's choices on the same rhythm as the agents.
+    plugins.ensure()
     try:
         with transaction() as session:
             rows = session.execute(select(OwnerAgent).where(OwnerAgent.status == "active").order_by(OwnerAgent.id)).scalars().all()

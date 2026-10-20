@@ -82,3 +82,39 @@ redesign and archive, Nia's proposal made only after clearance, the admin API); 
 upgrade/downgrade and `alembic check` on PostgreSQL; the admin builds. In a browser on a fresh install: New agent →
 QA Runner → Make the agent → its page with the design open; a too-short job is refused with the rule; no page errors,
 light, dark and phone width.
+
+## CT3 — the plugin interface (2026-10-20)
+
+Projects connect to the core; the core still knows no business. The owner's first project will be a fresh clone of
+Zelyq (CT4), so the interface is ready for a project in any language: Python plugins and an HTTP connector, one contract.
+
+- **The interface** (`app/plugin_api.py`, version 1.0): `Plugin` with tools (Records), actions, metrics (Signals),
+  starter templates, settings and the fields that are personal; a `Context` for the plugin's code (its settings, the
+  agent, its own data folder, `emit`). Developer guide: `docs/PLUGINS.md`.
+- **Python plugins**: `plugins/<key>/plugin.py`, imported as their own package; a broken one is reported and left out
+  (`services/plugins/loader.py`). Docker: `plugins/` is in the image and mounted from the host in compose.
+- **HTTP connector** (`services/plugins/connector.py`): the project serves `/manifest`, `/tools/…`,
+  `/actions/…/check|recheck|execute` and `/metrics`; the manifest is validated and becomes the same `Plugin`.
+  Every request is signed both ways (HMAC-SHA256 over time, path and body; five minutes; `services/plugins/signing.py`).
+- **Registration** (`services/plugins/core.py`): tools `<plugin>_<tool>`, actions `<plugin>.<action>` with executor,
+  type checks, `check`/`recheck` and duplicate target, Insights numbers `<plugin>_<metric>`, templates
+  `<plugin>.<template>`. Taken names refuse the plugin. Each plugin starts **off**: hidden from the agent template,
+  templates and catalogue, and every call refused; a cleared action carried out after it was switched off fails with
+  that reason. On/off, settings (secrets encrypted) and the shared secret are platform settings, re-read every few
+  seconds in each process.
+- **Personal fields** the plugin names are hidden at any depth in tool answers, action results, views and events.
+- **Events in**: `POST /plugin-api/v1/<plugin>/events`, signed, outside the IP allowlist, 50 events / 64 KB a request.
+- **Numbers**: `plugins.collect` every 15 minutes writes today's values (`plugin.<key>.<metric>`, per dimension);
+  Insights → Today shows the switched-on plugins' numbers.
+- **Admin → Plugins**: list, problems, on/off, settings, new shared secret (shown once), connect / fetch / remove an
+  HTTP project, views (a tool shown as a table, personal fields hidden), collect now. Docs: Admin → Docs → Plugins.
+- **Example**: `examples/plugins/hello_shop` (two tools, an L2 action with check/recheck/target, two numbers, a
+  starter agent, a required setting, a personal field) — the tests load it.
+
+Checks: tests in `test_9_plugins.py` — the example loads off and is offered only when switched on; an agent from its
+template reads (e-mails hidden), proposals are checked (sold out, duplicate, missing field), the cleared action runs
+once and emits its event; switched off, a cleared action fails with the reason; numbers reach Insights and are
+replaced, not added; broken folders are reported (crash, no plugin, wrong key, bad name, future API, taken names, bad
+target); signatures bind time, path and body; a fake HTTP project is connected, fetched, switched on, used by an agent
+(tool, check, L3 action, metric, view), sends signed events (unsigned, wrong, stale and old-secret refused) and is
+removed; the owner cannot switch a plugin on without its required settings. Full suite on SQLite and PostgreSQL.

@@ -49,6 +49,10 @@ def defaults() -> dict[str, Any]:
         "character": {},
         # Outside agents (services/outside): the pause for all, credential days, daily calls. Empty: the defaults.
         "outside": {},
+        # Plugins (services/plugins): which are switched on, their settings (secrets encrypted) and shared secret, the
+        # last collection of their numbers; and the projects connected over HTTP with their manifests.
+        "plugins": {},
+        "plugin_connections": {},
         # Kill switches: stop all automation at once.
         "switches": {name: False for name in SWITCHES},
     }

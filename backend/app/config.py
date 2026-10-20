@@ -46,6 +46,8 @@ class Settings(BaseSettings):
         "verify-full"
     )
     data_dir: str = "../.runtime-data"
+    # Python plugins: one folder each with a plugin.py (docs/PLUGINS.md). Missing folder = none.
+    plugins_dir: str = "../plugins"
     # Migrations may run as another role than the server's (empty: DATABASE_URL).
     database_migration_url: str = ""
 

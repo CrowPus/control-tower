@@ -41,8 +41,8 @@ class Kpi:
     hint: str = ""
 
 
-# The install's own numbers. A plugin adds its business's numbers (Signals) from stage CT3.
-KPIS: tuple[Kpi, ...] = (
+# The install's own numbers, then the plugins' (services/plugins adds and removes theirs: `<plugin>_<metric>`).
+KPIS: list[Kpi] = [
     Kpi("agent_runs", "Agent runs", "agents.runs", "*", good="neutral"),
     Kpi("proposals", "Proposals made", "clearance.proposed", good="neutral", hint="What the agents asked clearance for."),
     Kpi("cleared", "Cleared", "clearance.decided", "approved", good="neutral", hint="Proposals the owner approved."),
@@ -51,7 +51,7 @@ KPIS: tuple[Kpi, ...] = (
     Kpi("requests", "Requests", "requests.count", "*", good="neutral"),
     Kpi("server_errors", "Server errors", "requests.errors", "*", good="down"),
     Kpi("client_errors", "Errors in browsers", "errors", "*", good="down"),
-)
+]
 BY_KEY = {k.key: k for k in KPIS}
 
 

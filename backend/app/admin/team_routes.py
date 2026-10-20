@@ -359,7 +359,7 @@ def team_catalogue(_ctx: CurrentAdmin) -> TeamCatalogueOut:
         return TeamTemplateOut(key=t.key, name=t.name, department=t.department, design=design, playbook=playbook, tags=list(t.tags))
 
     return TeamCatalogueOut(
-        templates=[template(t) for t in templates.TEMPLATES],
+        templates=[template(t) for t in templates.offered()],
         tools=[TeamToolOut(key=k, description=tools.CATALOGUE[k][1]) for k in agents.offered_tools()],
         common_tools=[TeamToolOut(key=k, description=tools.CATALOGUE[k][1]) for k in registry.COMMON_TOOLS if k in tools.CATALOGUE],
         actions=[TeamActionOut(key=k, label=registry.ACTIONS[k].label, ceiling=registry.ACTIONS[k].ceiling, level="L1", approved_in_a_row=0)
@@ -371,7 +371,7 @@ def team_catalogue(_ctx: CurrentAdmin) -> TeamCatalogueOut:
 
 @router.post("/agents", response_model=TeamAgentDetailOut)
 def create_team_agent(data: TeamNewAgentIn, ctx: OwnerAdmin, session: AdminDb) -> TeamAgentDetailOut:
-    if data.template and data.template not in templates.BY_KEY:
+    if data.template and data.template not in {t.key for t in templates.offered()}:
         raise ValidationFailed("No such starter template.", code="INVALID_AGENT_DESIGN")
     try:
         row = agents.create(session, data.design, by=ctx.admin.email, template=data.template, playbook=data.playbook)

@@ -36,6 +36,8 @@ DEFAULT_JOBS: list[dict[str, Any]] = [
     {"name": "insights_alerts", "task_type": "insights.alerts", "queue": "maintenance", "interval_seconds": 5 * 60},
     {"name": "insights_weekly", "task_type": "insights.weekly", "queue": "notifications", "interval_seconds": 3600},
     {"name": "insights_prune", "task_type": "insights.prune", "queue": "maintenance", "interval_seconds": 3600},
+    # Plugins: their numbers into Insights.
+    {"name": "plugins_collect", "task_type": "plugins.collect", "queue": "maintenance", "interval_seconds": 15 * 60},
     # The agents: start due agents, carry out cleared actions. Idle until the owner creates and switches on an agent.
     {"name": "team_dispatch", "task_type": "team.dispatch", "queue": "maintenance", "interval_seconds": 60},
     # Meetings with Nia: decks prepared at the owner's time, minutes after, the next weekly one.

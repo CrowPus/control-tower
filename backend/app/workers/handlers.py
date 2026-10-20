@@ -36,6 +36,9 @@ from ..services.nia import (
 from ..services.outside import (
     hosted as _outside_hosted,  # noqa: F401 - registers outside.run, outside.dispatch
 )
+from ..services.plugins import (
+    tasks as _plugin_tasks,  # noqa: F401 - registers plugins.collect
+)
 from ..services.qa import (
     tasks as _qa_tasks,  # noqa: F401 - registers qa.sweep
 )
