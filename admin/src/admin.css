@@ -26,7 +26,7 @@
 
 /* Nia points at what it talks about while presenting (data-nia markers). */
 .nia-highlight {
-  outline: 3px solid var(--color-primary, #0e7490);
+  outline: 3px solid var(--color-primary, #33019d);
   outline-offset: 4px;
   border-radius: 10px;
   animation: nia-pulse 1.6s ease-in-out 3;

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Control Tower's design tokens: runtime variables so light and dark are both real themes; Tailwind utilities reference
-   them through @theme inline. The primary colour is the tower's cyan (brand/mark.svg). */
+   them through @theme inline. The primary colour is the logo's purple, the accent its green (brand/mark.png). */
 :root {
   --bg: #fafafa;
   --surface: #ffffff;
@@ -12,10 +12,11 @@
   --fg: #18181b;
   --fg-muted: #52525b;
   --fg-subtle: #8b8b94;
-  --primary: #0e7490;
-  --primary-hover: #155e75;
+  --primary: #33019d;
+  --primary-hover: #26017a;
   --primary-fg: #ffffff;
-  --primary-soft: #ecfeff;
+  --primary-soft: #f1ebff;
+  --accent: #08eb90;
   --success: #15803d;
   --success-soft: #dcfce7;
   --warning: #b45309;
@@ -24,7 +25,7 @@
   --danger-soft: #fee2e2;
   --info: #0369a1;
   --info-soft: #e0f2fe;
-  --focus-ring: rgba(14, 116, 144, 0.45);
+  --focus-ring: rgba(51, 1, 157, 0.4);
   --shadow: 0 8px 24px rgba(24, 24, 27, 0.12);
   color-scheme: light;
 }
@@ -39,11 +40,12 @@
   --fg: #f7f8f8;
   --fg-muted: #8a8f98;
   --fg-subtle: #62666d;
-  /* A lighter cyan on dark, readable as text; buttons carry dark text on it. */
-  --primary: #22d3ee;
-  --primary-hover: #67e8f9;
-  --primary-fg: #04222a;
-  --primary-soft: rgba(34, 211, 238, 0.14);
+  /* A lighter purple on dark, readable as text; buttons carry dark text on it. */
+  --primary: #a78bfa;
+  --primary-hover: #c4b5fd;
+  --primary-fg: #1a0b45;
+  --primary-soft: rgba(167, 139, 250, 0.16);
+  --accent: #08eb90;
   --success: #3fbf5f;
   --success-soft: rgba(39, 166, 68, 0.18);
   --warning: #f5a524;
@@ -52,7 +54,7 @@
   --danger-soft: rgba(239, 68, 68, 0.18);
   --info: #7dd3fc;
   --info-soft: rgba(56, 189, 248, 0.14);
-  --focus-ring: rgba(34, 211, 238, 0.5);
+  --focus-ring: rgba(167, 139, 250, 0.5);
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
   color-scheme: dark;
 }
@@ -71,6 +73,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-fg: var(--primary-fg);
   --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);

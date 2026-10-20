@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/logo.png" alt="Control Tower" width="420"></p>
+
 # Control Tower
 
 Your own AI team, on your own server.
