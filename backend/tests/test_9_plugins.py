@@ -62,7 +62,7 @@ def clean() -> Iterator[None]:
     yield
     wipe()
     connector.TRANSPORT = None
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def test_the_example_plugin_loads_and_stays_off_until_the_owner_switches_it_on() -> None:

@@ -36,7 +36,7 @@ every call to it is refused.
 - **Templates** — starter agents for Team → New agent. Name your own tools, actions and metrics by their short key;
   the owner can change everything before making the agent.
 - **Settings** (Python only) — what the owner fills in on Admin → Plugins: an address, a key. `secret=True` values are
-  stored encrypted and never shown again.
+  stored encrypted and never shown again. `long=True` gives a box of several lines (a JSON list, a text).
 - **Events** — your project tells the team something happened; agents subscribed to `<plugin>.<type>` wake up.
 - **Personal fields** — names of fields that hold personal data (`email`, `phone`, `name`). Control Tower replaces
   them with "(personal — hidden)" in every tool answer, action result and event, at any depth, before an agent or a
@@ -55,7 +55,8 @@ plugins/
     client.py        # any other files; import them relatively: from .client import Shop
 ```
 
-The folder name is the plugin's key. A complete example to copy: `examples/plugins/hello_shop/plugin.py`.
+The folder name is the plugin's key. A complete example to copy: `examples/plugins/hello_shop/plugin.py`. Two real
+ones ship with every install, read-only: `plugins/stripe` and `plugins/database`.
 
 A Python plugin runs inside Control Tower with all of its rights (its database, its secrets, its files). Install only
 plugin code you wrote or trust, as you would any code on your server. A project you trust less belongs behind the HTTP
@@ -91,6 +92,12 @@ writes to) and `ctx.emit(type, payload)`.
 - Tools: `run(ctx, **params) -> dict`. Params arrive with their declared types; unknown ones are dropped.
 - Actions: `execute(ctx, payload, approval_id) -> dict`, `check(ctx, payload) -> list[str]`, `recheck(ctx, payload) -> list[str]`.
 - Metrics: `read(ctx) -> float | dict[str, float]`.
+
+**Parts that follow the owner's settings.** When what a plugin offers depends on its settings — the database plugin
+turns each query the owner writes into a tool — give the `Plugin` a `build(settings) -> Plugin` function. Control
+Tower calls it with the settings (secrets decrypted) when the plugin loads and whenever its settings change, and uses
+the Plugin it returns (same key). A `ValueError` from it keeps the fixed parts and shows the message on Admin →
+Plugins. See `plugins/database/plugin.py`.
 
 An exception in a tool becomes "failed — do not guess" for the agent; in `execute` the proposal is marked failed with
 the reason; in `check` the proposal is refused (try again later); in `recheck` it is ignored (an unreachable project

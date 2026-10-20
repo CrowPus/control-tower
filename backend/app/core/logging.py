@@ -43,6 +43,8 @@ def _secret_values() -> list[str]:
     cfg = settings()
     values = [
         cfg.gemini_api_key,
+        cfg.anthropic_api_key,
+        cfg.openai_api_key,
         cfg.smtp_password,
         cfg.encryption_secret,
     ]

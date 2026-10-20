@@ -33,6 +33,7 @@ from PIL import Image, ImageDraw, ImageOps
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ...ai.providers import gemini_key
 from ...config import settings
 from ...core import clock
 from ...models import AIUsage, MarketingMedia, MarketingVideo, SocialPost, TeamApproval
@@ -101,7 +102,7 @@ class Poll:
 def _client() -> Any:
     from google import genai
 
-    return genai.Client(api_key=settings().gemini_api_key)
+    return genai.Client(api_key=gemini_key())
 
 
 def _start(prompt: str, model: str, references: Sequence[tuple[bytes, str]], seconds: int, first_frame: tuple[bytes, str] | None = None) -> str:
@@ -139,7 +140,7 @@ def _poll(name: str) -> Poll:
 def _download(uri: str) -> bytes:
     import httpx
 
-    response = httpx.get(uri, headers={"x-goog-api-key": settings().gemini_api_key}, follow_redirects=True, timeout=300)
+    response = httpx.get(uri, headers={"x-goog-api-key": gemini_key()}, follow_redirects=True, timeout=300)
     response.raise_for_status()
     return response.content
 

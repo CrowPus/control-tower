@@ -26,7 +26,7 @@ def clean(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     with _db() as db:
         db.execute(delete(AIUsage))
         db.execute(delete(PlatformSetting).where(PlatformSetting.key == "agents"))
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def _spent(agent_type: str, usd: float, operation: str) -> None:

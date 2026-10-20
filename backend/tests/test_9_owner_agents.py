@@ -46,7 +46,7 @@ def clean() -> Iterator[None]:
     wipe()
     yield
     wipe()
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def test_every_starter_template_keeps_the_rules_and_offers_only_real_tools() -> None:

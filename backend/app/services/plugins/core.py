@@ -20,7 +20,7 @@ import secrets as _secrets
 import threading
 import time
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -64,6 +64,8 @@ class Loaded:
     warnings: list[str] = field(default_factory=list)
     # What it was built from (HTTP: the manifest), to rebuild only when that changes.
     fingerprint: str = ""
+    # A Python plugin with `build`: the plugin as its folder defines it, rebuilt from it for the owner's settings.
+    base: Plugin | None = None
 
 
 LOADED: dict[str, Loaded] = {}
@@ -108,6 +110,7 @@ def save_state(session: Session, value: dict[str, Any]) -> None:
     platform.put(session, STATE, value)
     with _lock:
         _cache.update(state=value, read_at=time.monotonic())
+    sync_built()
 
 
 def save_connections(session: Session, value: dict[str, Any]) -> None:
@@ -168,11 +171,44 @@ def ensure() -> None:
                         continue
                     try:
                         register(found.plugin, "python", found.location)
+                        if found.plugin.build is not None:
+                            LOADED[found.plugin.key].base = found.plugin
                     except PluginError as exc:
                         FAILED[found.plugin.key] = str(exc)
                         log.warning("plugin %s not loaded: %s", found.plugin.key, exc)
                 _cache["python_loaded"] = True
     sync_connections(connections())
+    sync_built()
+
+
+def sync_built() -> None:
+    """Rebuild every plugin with `build` whose settings changed since it was built."""
+    with _lock:
+        for key, loaded in list(LOADED.items()):
+            base = loaded.base
+            if base is None or base.build is None:
+                continue
+            fingerprint = hashlib.sha256(json.dumps(state().get(key, {}).get("values") or {}, sort_keys=True).encode()).hexdigest()
+            if loaded.fingerprint == fingerprint:
+                continue
+            warnings: list[str] = []
+            try:
+                built = base.build(values(key))
+                if not isinstance(built, Plugin) or built.key != key:
+                    raise PluginError("build() must return a Plugin with the same key.")
+            except (ValueError, PluginError) as exc:
+                built, warnings = replace(base, build=None), [f"Its settings could not be used: {exc}"]
+            except Exception as exc:  # noqa: BLE001 - a plugin's own code failing must not stop the install
+                built, warnings = replace(base, build=None), [f"Building it from its settings failed: {exc.__class__.__name__}: {str(exc)[:200]}"]
+            location = loaded.location
+            unregister(key)
+            try:
+                fresh = register(replace(built, build=None), "python", location, fingerprint=fingerprint)
+            except PluginError as exc:
+                fresh = register(replace(base, build=None), "python", location, fingerprint=fingerprint)
+                warnings.append(f"Its settings could not be used: {exc}")
+            fresh.base = base
+            fresh.warnings = [*warnings, *fresh.warnings]
 
 
 def sync_connections(wanted: Mapping[str, Any]) -> None:

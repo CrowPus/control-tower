@@ -17,6 +17,13 @@ A plugin connects one of your projects — your app, shop or website — to Cont
 
 Fields the plugin marks **personal** (e-mail addresses, phone numbers, names …) are hidden from every agent, and from the views here, wherever they appear.
 
+## Ready to use
+
+Two plugins come with every install, both **read-only** and **off** until you switch them on:
+
+- **Stripe** — subscriptions, payments (and why they failed) and revenue for your agents; monthly recurring revenue, active subscriptions, failed payments and revenue per day in Insights; a **Revenue Watcher** starter agent. It never changes anything in Stripe. Give it a *restricted* key with read access only (Stripe → Developers → API keys → Create restricted key: Read on Customers, Subscriptions, Charges and Prices), and your main currency. Customers' e-mail addresses, names, phones and addresses never reach an agent.
+- **Database** — your project's own database (PostgreSQL or MySQL). You write the questions agents may ask it, as SQL queries in the *Queries* setting; each becomes a tool, and a query that answers with one number (marked `"metric": "sum"` or `"last"`) becomes a number in Insights. Agents never write SQL: they only run your queries. Use a database user that may only read; the plugin also opens every connection read-only, with a ten-second limit, and refuses any query that is not a single SELECT. At most 200 rows go back. List columns agents must not see under *Personal columns*. If a query is not right, the reason is shown here and the plugin offers no queries until it is fixed.
+
 ## Two ways to connect a project
 
 - **Python plugin** — a folder in the server's `plugins/` folder. It appears here after the server restarts. It runs inside Control Tower with all of its rights, so install only plugin code you wrote or trust. Developers: see `docs/PLUGINS.md` in the code.

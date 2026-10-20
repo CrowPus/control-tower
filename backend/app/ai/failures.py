@@ -14,6 +14,7 @@ from typing import Any
 from google.genai import errors as genai_errors
 
 from ..core.logging import get_logger, log_event
+from .providers import ProviderError
 
 log = get_logger("app.ai")
 
@@ -31,15 +32,17 @@ def kind(exc: BaseException) -> dict[str, Any]:
     if isinstance(exc, genai_errors.APIError):
         out["code"] = exc.code
         out["status"] = exc.status
+    elif isinstance(exc, ProviderError):
+        out["code"] = exc.code
     return out
 
 
 def transient(exc: BaseException) -> bool:
-    return isinstance(exc, genai_errors.APIError) and exc.code in TRANSIENT_CODES
+    return isinstance(exc, (genai_errors.APIError, ProviderError)) and exc.code in TRANSIENT_CODES
 
 
 def busy(exc: BaseException) -> bool:
-    return isinstance(exc, genai_errors.APIError) and exc.code == 429
+    return isinstance(exc, (genai_errors.APIError, ProviderError)) and exc.code == 429
 
 
 def record(what: str, exc: BaseException, **fields: Any) -> None:

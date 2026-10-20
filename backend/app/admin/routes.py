@@ -104,6 +104,12 @@ def _set_cookie(response: Response, raw: str) -> None:
     )
 
 
+def _ai_configured() -> bool:
+    from ..ai import providers
+
+    return providers.configured()
+
+
 @router.post("/auth/login", response_model=LoginOut)
 def login(data: LoginIn, request: Request, response: Response, session: AdminDb) -> LoginOut:
     admin, row, raw = auth.login(session, email=str(data.email), password=data.password, ip=client_ip(request), user_agent=request.headers.get("user-agent", ""))
@@ -468,7 +474,7 @@ def system(ctx: CurrentAdmin, session: AdminDb) -> SystemOut:
         last_task_finished_at=session.execute(select(func.max(AgentTask.finished_at))).scalar(),
         scheduler_last_run_at=session.execute(select(func.max(ScheduledJob.last_run_at))).scalar(),
         system_mail_configured=system_mail.is_configured(),
-        ai_configured=bool(cfg.gemini_api_key),
+        ai_configured=_ai_configured(),
         redis_configured=bool(cfg.redis_url),
     )
 

@@ -83,12 +83,11 @@ class GeminiModel:
         from google import genai
         from google.genai import types
 
-        from ...ai import failures
-        from ...config import settings
+        from ...ai import failures, providers
 
-        cfg = settings()
-        if not cfg.gemini_api_key:
-            raise BudgetStop("No AI key is configured on the server.")
+        key = providers.key("gemini")
+        if not key:
+            raise BudgetStop("No Gemini key is set (Admin → Platform → AI).")
         model = ModelConfig.resolve("fast" if tier == "fast" else "reasoning")
         # Files the owner attached that the model looks at itself (images, PDFs without text).
         parts = [types.Part(text=prompt), *(types.Part.from_bytes(data=data, mime_type=mime) for mime, data in (media or []))]
@@ -99,7 +98,7 @@ class GeminiModel:
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         last_text = ""
-        with genai.Client(api_key=cfg.gemini_api_key, http_options=types.HttpOptions(timeout=90_000)) as client:
+        with genai.Client(api_key=key, http_options=types.HttpOptions(timeout=90_000)) as client:
             rounds = max_rounds or MAX_ROUNDS
             for round_ in range(rounds + 1):
                 for attempt in range(EMPTY_RETRIES + 1):
@@ -173,7 +172,18 @@ class GeminiModel:
         return last_text
 
 
-MODEL: Model = GeminiModel()
+class ProviderModel:
+    """The owner's provider for this call (Admin → Platform → AI): Gemini, Claude or OpenAI."""
+
+    def converse(self, **kwargs: Any) -> str:
+        from ...ai import providers, vendors
+
+        name = providers.provider()
+        model: Model = GeminiModel() if name == "gemini" else vendors.VendorModel(name)
+        return model.converse(**kwargs)
+
+
+MODEL: Model = ProviderModel()
 
 
 def use_model(model: Model) -> Model:

@@ -48,7 +48,7 @@ def clean(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         db.execute(delete(AgentTask).where(AgentTask.task_type == "team.run"))
         db.execute(delete(PlatformSetting).where(PlatformSetting.key.in_(("agents", "mailboxes"))))
     yield
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def _ready(**agent: Any) -> None:
@@ -476,7 +476,7 @@ def test_an_agent_is_told_before_its_last_round_and_some_agents_get_more_rounds(
     monkeypatch.setattr("google.genai.Client", Client)
     monkeypatch.setattr(settings(), "gemini_api_key", "test-key")
     calls: list[str] = []
-    runner.GeminiModel().converse(tier="fast", system="s", prompt="p", declarations=tools.declarations(("read_insights", "propose")),
+    runner.ProviderModel().converse(tier="fast", system="s", prompt="p", declarations=tools.declarations(("read_insights", "propose")),
                                   call_tool=lambda name, args: calls.append(name) or {"ok": True}, before_round=lambda: None, on_usage=lambda u: None, max_rounds=3)
     assert calls == ["read_insights", "read_insights", "read_insights", "propose"], "three rounds of research, and the last round's proposal is carried out"
     assert len(requests) == 5, "four rounds, then the summary request"

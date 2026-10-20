@@ -17,6 +17,7 @@ htmlcov
 !**/.env.example
 .runtime-data
 tls
+backups
 
 # Version control
 .git

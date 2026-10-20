@@ -72,7 +72,7 @@ def test_the_deck_is_prepared_at_the_owners_time_and_a_weekly_meeting_repeats() 
             nxt = db.execute(select(NiaMeeting).where(NiaMeeting.status == "scheduled")).scalar_one()
             assert nxt.starts_at == now + timedelta(hours=3, days=7) and nxt.deck == []
     finally:
-        runner.use_model(runner.GeminiModel())
+        runner.use_model(runner.ProviderModel())
 
 
 def test_the_owner_schedules_and_presents(admin: Any) -> None:  # noqa: F811 - the fixture

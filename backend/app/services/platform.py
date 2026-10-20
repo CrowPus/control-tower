@@ -53,6 +53,10 @@ def defaults() -> dict[str, Any]:
         # last collection of their numbers; and the projects connected over HTTP with their manifests.
         "plugins": {},
         "plugin_connections": {},
+        # The AI the install thinks with (ai/providers.py): provider, keys (encrypted), models, prices.
+        "ai": {},
+        # The first-run setup (admin/setup_routes.py): done or not.
+        "setup": {},
         # Kill switches: stop all automation at once.
         "switches": {name: False for name in SWITCHES},
     }

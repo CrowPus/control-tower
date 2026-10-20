@@ -66,6 +66,8 @@ class Setting:
     hint: str = ""
     secret: bool = False
     required: bool = False
+    # A long value (a JSON list, a text): edited in a box of several lines.
+    long: bool = False
 
 
 @dataclass(frozen=True)
@@ -149,3 +151,7 @@ class Plugin:
     # Field names that hold personal data (email, phone, name …): removed from every tool result and event before an
     # agent sees it, wherever they occur.
     personal: tuple[str, ...] = ()
+    # For a plugin whose parts depend on the owner's settings (a database plugin's named queries): called with the
+    # settings (secrets decrypted) when the plugin loads and whenever its settings change; returns the Plugin to use,
+    # with the same key. Raising ValueError keeps the plugin's fixed parts and shows the message on Admin → Plugins.
+    build: Callable[[Mapping[str, Any]], Plugin] | None = None

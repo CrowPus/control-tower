@@ -19,6 +19,11 @@ from collections.abc import Iterator
 from pathlib import Path
 
 _DATA_DIR = Path(tempfile.mkdtemp(prefix="ct-test-"))
+_REPO = Path(__file__).resolve().parents[2]
+_PLUGINS = _DATA_DIR / "plugins"
+_PLUGINS.mkdir()
+for _source in (_REPO / "examples" / "plugins" / "hello_shop", _REPO / "plugins" / "stripe", _REPO / "plugins" / "database"):
+    (_PLUGINS / _source.name).symlink_to(_source)
 os.environ.update(
     {
         "EXECUTION_MODE": "test",
@@ -42,8 +47,8 @@ os.environ.update(
         "REDIS_URL": "",
         "LOG_JSON": "false",
         "LOG_LEVEL": "WARNING",
-        # The example plugin (examples/plugins/hello_shop) is this suite's Python plugin.
-        "PLUGINS_DIR": str(Path(__file__).resolve().parents[2] / "examples" / "plugins"),
+        # This suite's Python plugins: the example (examples/plugins/hello_shop) and the ones every install ships.
+        "PLUGINS_DIR": str(_PLUGINS),
     }
 )
 

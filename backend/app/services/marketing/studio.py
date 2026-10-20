@@ -22,6 +22,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ...ai.providers import gemini_key
 from ...config import settings
 from ...models import AIUsage, MarketingMedia
 from . import brand
@@ -58,7 +59,7 @@ def _generate(prompt: str, aspect: str, model: str, references: Sequence[tuple[b
     from google import genai
     from google.genai import types
 
-    client = genai.Client(api_key=settings().gemini_api_key)
+    client = genai.Client(api_key=gemini_key())
     contents: Any = [*(types.Part.from_bytes(data=data, mime_type=mime) for data, mime in references), prompt] if references else prompt
     response = client.models.generate_content(model=model, contents=contents,
                                               config=types.GenerateContentConfig(response_modalities=["IMAGE"], image_config=types.ImageConfig(aspect_ratio=aspect)))

@@ -52,3 +52,6 @@ dist-admin
 
 # Keys and credentials on the server (never committed)
 secrets/
+
+# Backups (scripts/backup.sh): they hold the database and a copy of .env
+backups/

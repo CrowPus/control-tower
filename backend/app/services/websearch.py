@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from ..ai.client import ModelConfig
+from ..ai.providers import gemini_key
 
 # Safety rails, not business values: the answer's length and how many sources come back.
 MAX_OUTPUT_TOKENS = 2500
@@ -39,7 +40,7 @@ def gemini_search(query: str, tier: str) -> Found:
     from ..config import settings
 
     cfg = settings()
-    if not cfg.gemini_api_key:
+    if not gemini_key():
         raise RuntimeError("No AI key is configured on the server.")
     model = ModelConfig.resolve("fast" if tier == "fast" else "reasoning")
     prompt = (f"Search the web and answer for an agent of {cfg.app_name}. Name each concrete fact's source with its OWN official website "
@@ -47,7 +48,7 @@ def gemini_search(query: str, tier: str) -> Found:
               "you found nothing.\n\n"
               f"Question: {query}")
     started = time.perf_counter()
-    with genai.Client(api_key=cfg.gemini_api_key, http_options=types.HttpOptions(timeout=90_000)) as client:
+    with genai.Client(api_key=gemini_key(), http_options=types.HttpOptions(timeout=90_000)) as client:
         response = client.models.generate_content(model=model, contents=prompt, config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())], max_output_tokens=MAX_OUTPUT_TOKENS, temperature=0.2))
     usage = response.usage_metadata

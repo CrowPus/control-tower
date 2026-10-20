@@ -34,6 +34,7 @@ from urllib.parse import urlsplit
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ...ai.providers import gemini_key
 from ...config import settings
 from ...core.logging import get_logger
 from ...models import AgentTask, AIUsage, BrowserSession, BrowserStep
@@ -384,14 +385,14 @@ class GeminiBrowserModel:
         from google.genai import types
 
         cfg = settings()
-        if not cfg.gemini_api_key:
+        if not gemini_key():
             raise BrowserError("No Gemini key is set.")
         config = types.GenerateContentConfig(
             system_instruction=system,
             tools=[types.Tool(computer_use=types.ComputerUse(environment=types.Environment.ENVIRONMENT_BROWSER, excluded_predefined_functions=["drag_and_drop"])),
                    types.Tool(function_declarations=[types.FunctionDeclaration.model_validate(f) for f in CUSTOM_FUNCTIONS])],
         )
-        with genai.Client(api_key=cfg.gemini_api_key, http_options=types.HttpOptions(timeout=90_000)) as gc:
+        with genai.Client(api_key=gemini_key(), http_options=types.HttpOptions(timeout=90_000)) as gc:
             resp = gc.models.generate_content(model=cfg.nia_browser_model, contents=contents, config=config)
         parts: list[dict[str, Any]] = []
         cand = resp.candidates[0] if resp.candidates else None

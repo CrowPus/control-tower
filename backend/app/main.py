@@ -25,6 +25,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import plugin_events, public_media, runtime
+from .admin.ai_routes import router as ai_router
 from .admin.brain_routes import router as brain_router
 from .admin.docs_routes import router as docs_router
 from .admin.insights_routes import router as insights_router
@@ -178,7 +179,7 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    for each in (router, insights_router, team_router, nia_router, brain_router, office_router, mail_router, social_router,
+    for each in (router, ai_router, insights_router, team_router, nia_router, brain_router, office_router, mail_router, social_router,
                  product_router, oversight_router, nia_browser_router, docs_router, outside_router,
                  plugin_router, outside_gateway.router, public_media.router, plugin_events.router):
         app.include_router(each)

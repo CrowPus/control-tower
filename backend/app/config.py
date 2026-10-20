@@ -121,6 +121,15 @@ class Settings(BaseSettings):
 
     # --- AI (Gemini) -------------------------------------------------------------
     gemini_api_key: str = ""
+    # The other providers the owner may choose for text work (Admin → Platform → AI; keys set there win). Claude's
+    # models have defaults; OpenAI's are the owner's to name. OPENAI_BASE_URL: any service speaking OpenAI's API.
+    anthropic_api_key: str = ""
+    anthropic_reasoning_model: str = "claude-sonnet-5-5"
+    anthropic_fast_model: str = "claude-haiku-5-5"
+    openai_api_key: str = ""
+    openai_base_url: str = ""
+    openai_reasoning_model: str = ""
+    openai_fast_model: str = ""
     # Nia's browser: the internal browser service and the model that looks at its screen.
     nia_browser_url: str = "http://browser:8100"
     nia_browser_model: str = "gemini-3.8-flash"
@@ -181,7 +190,14 @@ class Settings(BaseSettings):
 
     @property
     def cookie_secure(self) -> bool:
-        return self.is_production
+        """Secure cookies in production, except for a trial on this machine: an admin address of http://localhost or
+        http://127.0.0.1 (a browser never sends a Secure cookie over plain HTTP). Any other address keeps them Secure."""
+        if not self.is_production:
+            return False
+        from urllib.parse import urlparse
+
+        admin = urlparse(self.admin_public_base_url or self.public_base_url)
+        return not (admin.scheme == "http" and admin.hostname in ("localhost", "127.0.0.1", "::1"))
 
     @property
     def smtp_login(self) -> str:

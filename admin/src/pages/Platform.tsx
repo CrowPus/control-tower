@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Me } from "../App";
 import { api, unwrap } from "../api";
 import { useAction } from "../hooks";
+import { AICard } from "./Welcome";
 import { Alert, Button, Card, Empty, Field, Input, PageTitle, Select, Table, Td, Toggle, ago, when } from "../ui";
 
 const SWITCH_TEXT: Record<string, { label: string; description: string }> = {
@@ -22,6 +23,7 @@ export function PlatformPage({ me }: { me: Me }) {
       <PageTitle title="Platform" description={owner ? "Settings for the whole install. Changes take effect at once and are logged." : "Settings for the whole install. Only an owner can change them."} />
       {put.notice && <div className="mb-3"><Alert tone={put.notice.tone}>{put.notice.text}</Alert></div>}
       {!data.system_mail_configured && <div className="mb-3"><Alert tone="warning">The install's mailbox (SMTP_*) is not configured: admin invitations and alerts cannot be e-mailed.</Alert></div>}
+      <div className="mb-4"><AICard owner={owner} /></div>
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Emergency switches">
           <p className="mb-1 text-xs text-muted">For everything at once.</p>

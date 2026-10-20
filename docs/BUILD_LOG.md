@@ -118,3 +118,48 @@ replaced, not added; broken folders are reported (crash, no plugin, wrong key, b
 target); signatures bind time, path and body; a fake HTTP project is connected, fetched, switched on, used by an agent
 (tool, check, L3 action, metric, view), sends signed events (unsigned, wrong, stale and old-secret refused) and is
 removed; the owner cannot switch a plugin on without its required settings. Full suite on SQLite and PostgreSQL.
+
+## CT5, CT6 and the release docs — ready to install (2026-10-20)
+
+The owner asked for everything to be finished before the first project (a fresh clone of Zelyq) is connected.
+
+**The install runs as a whole.** The Docker image was built and the full compose stack started for the first time:
+server, worker, PostgreSQL over verified TLS, Redis; migrations, scheduler and worker tasks, sign-in, the gateway and
+signed plugin events all worked. One fix: the session cookie is Secure in production except when the admin's own
+address is a loopback `http://` address (a trial on the same machine; any other address stays Secure).
+
+**AI provider choice** (`ai/providers.py`, `ai/vendors.py`): the owner chooses Google Gemini, Anthropic Claude or
+OpenAI (or an OpenAI-compatible address) in Admin → Platform → AI: keys stored encrypted (the environment's keys are
+the fallback), models per tier, prices per model (a Claude or OpenAI model without a price cannot be saved, so budgets
+count right), and a test call. Every text call goes to the chosen provider: the agents' tool loop (same rules as the
+Gemini loop: rounds, budget before each call, empty answers asked again, last round only for recording, a summary when
+the rounds end) and structured answers. Pictures, videos, Nia's voice and browser and web search stay Gemini's and use
+the Gemini key whichever provider thinks; the admin says so.
+
+**Getting started** (`/welcome`, `admin/ai_routes.py`): the owner's first page until finished — company (name and
+what it does), AI, the team's switch/language/budget (needed), then mail, the first agent and the project (optional).
+
+**Installer and operations**: `install.sh` (checks Docker, writes `.env` with strong secrets and mode 600, makes the
+database certificate, builds and starts, waits for health, invites the first owner; re-runnable, keeps secrets,
+invites only when no owner exists; `admin_cli has-owner`). `scripts/backup.sh` (database dump, files, `.env`, version;
+kept `BACKUP_KEEP_DAYS`; `BACKUP_COPY_COMMAND`), `scripts/restore.sh` (empties the schema first, so tables of a newer
+version go too), `scripts/update.sh` (backup, new version, health; back to the old version and the backup when it
+does not start; runs from a copy of itself). Tried for real in a separate install: install, re-run, backup and restore,
+an update, and an update to a version that migrates and then crashes — it went back to the old version with the data
+from before, no trace of the new migration. Two bugs found that way and fixed: `docker compose up` fails when the
+server never becomes healthy (the script stopped before going back), and `pg_restore --clean` left a newer table.
+
+**Ready-made plugins** (in `plugins/`, off until switched on, read-only): **Stripe** (subscriptions, payments and why
+they failed, revenue; MRR, active subscriptions, failed payments and revenue per day in the owner's main currency; a
+Revenue Watcher template; a restricted read key; customers' contact details hidden) and **Database** (PostgreSQL,
+MySQL or a local SQLite file; the owner's named SQL queries become tools, a one-number query a daily number;
+connections read-only with a 10 s limit, only one SELECT per query, 200 rows at most, personal columns hidden).
+The interface gained `build(settings)`: a plugin whose parts follow its settings is rebuilt when they change; settings
+that cannot be used keep the plugin and show why.
+
+**Docs**: README rewritten as the install guide (requirements measured: about 300 MB idle, 2 GB to build; reverse
+proxy with Caddy; SSH tunnel; backups and updates; optional parts), `.env.example`, `docs/PLUGINS.md` (`build`, the
+ready plugins), Admin → Docs (Getting started, Platform → AI, Plugins → Ready to use).
+
+Checks: backend tests on SQLite and PostgreSQL (new: providers, setup, Stripe, Database); ruff, mypy and shellcheck
+clean; the admin builds; browser checks of Getting started, the AI card and Plugins without page errors.

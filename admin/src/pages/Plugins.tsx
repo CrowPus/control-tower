@@ -6,7 +6,7 @@ import { Copy, Plug, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api, unwrap, type Schemas } from "../api";
 import { useAction } from "../hooks";
-import { Alert, Badge, Button, Card, Dialog, Empty, Field, Input, PageTitle, Toggle, ago } from "../ui";
+import { Alert, Badge, Button, Card, Dialog, Empty, Field, Input, PageTitle, Textarea, Toggle, ago } from "../ui";
 
 type PluginOut = Schemas["PluginOut"];
 
@@ -93,10 +93,12 @@ function PluginCard({ plugin, owner, onSecret }: { plugin: PluginOut; owner: boo
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">Settings</h3>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             {plugin.settings.map((s) => (
-              <Field key={s.key} label={`${s.label}${s.required ? "" : " (optional)"}`} hint={s.secret ? (s.set ? "Set. Type to replace it; leave empty to keep it." : s.hint || "Stored encrypted.") : s.hint}>
-                <Input type={s.secret ? "password" : "text"} autoComplete="off" disabled={!owner} placeholder={s.secret && s.set ? "••••••••" : ""}
-                  value={values[s.key] ?? (s.secret ? "" : s.value ?? "")} onChange={(e) => setValues({ ...values, [s.key]: e.target.value })} />
-              </Field>
+              <div key={s.key} className={s.long ? "sm:col-span-2" : ""}><Field label={`${s.label}${s.required ? "" : " (optional)"}`} hint={s.secret ? (s.set ? "Set. Type to replace it; leave empty to keep it." : s.hint || "Stored encrypted.") : s.hint}>
+                {s.long && !s.secret
+                  ? <Textarea rows={8} className="font-mono text-xs" disabled={!owner} value={values[s.key] ?? s.value ?? ""} onChange={(e) => setValues({ ...values, [s.key]: e.target.value })} />
+                  : <Input type={s.secret ? "password" : "text"} autoComplete="off" disabled={!owner} placeholder={s.secret && s.set ? "••••••••" : ""}
+                      value={values[s.key] ?? (s.secret ? "" : s.value ?? "")} onChange={(e) => setValues({ ...values, [s.key]: e.target.value })} />}
+              </Field></div>
             ))}
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">

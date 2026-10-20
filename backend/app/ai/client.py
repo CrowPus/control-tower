@@ -1,4 +1,5 @@
-"""Gemini client (spec §11, §12, §76).
+"""The AI client for structured answers (spec §11, §12, §76): the owner's provider (ai/providers.py) — Gemini,
+Claude or OpenAI.
 
 * one model-configuration service: reasoning / fast / embedding tiers from env
 * typed structured output validated with Pydantic — invalid output is rejected
@@ -53,20 +54,20 @@ class ModelConfig:
 
     @staticmethod
     def resolve(tier: Tier) -> str:
-        cfg = settings()
-        if tier == "fast":
-            return cfg.gemini_fast_model or cfg.gemini_reasoning_model
+        """The owner's provider's model for the tier (Admin → Platform → AI); embeddings are Gemini's."""
+        from . import providers
+
         if tier == "embedding":
-            return cfg.gemini_embedding_model
-        return cfg.gemini_reasoning_model
+            return settings().gemini_embedding_model
+        return providers.model("fast" if tier == "fast" else "reasoning")
 
     @staticmethod
     def describe() -> dict[str, Any]:
+        from . import providers
+
         cfg = settings()
         return {
-            "configured": bool(cfg.gemini_api_key),
-            "reasoning_model": cfg.gemini_reasoning_model,
-            "fast_model": cfg.gemini_fast_model,
+            **providers.describe(),
             "embedding_model": cfg.gemini_embedding_model,
             "daily_budget_usd": cfg.ai_daily_budget_usd,
             "monthly_budget_usd": cfg.ai_monthly_budget_usd,
@@ -76,10 +77,13 @@ class ModelConfig:
 # --- usage / budget -------------------------------------------------------------------
 def model_prices(model: str = "") -> tuple[float, float]:
     """(input, output) USD per million tokens for a model: its own list price, else the default."""
+    from . import providers
+
     cfg = settings()
     name = (model or "").lower()
-    for key in sorted(cfg.ai_model_prices, key=len, reverse=True):
-        price = cfg.ai_model_prices[key]
+    table = providers.prices()
+    for key in sorted(table, key=len, reverse=True):
+        price = table[key]
         if name.startswith(key.lower()) and len(price) == 2:
             return float(price[0]), float(price[1])
     return cfg.ai_input_price_per_million_usd, cfg.ai_output_price_per_million_usd
@@ -307,18 +311,31 @@ def _conservative_instance(schema: type[BaseModel]) -> BaseModel:
 
 # --- service ----------------------------------------------------------------------------------
 class GeminiService:
-    def __init__(self, provider: GeminiProvider | FakeProvider | None = None) -> None:
-        cfg = settings()
-        if provider is not None:
-            self.provider: GeminiProvider | FakeProvider = provider
-        elif cfg.gemini_api_key:
-            self.provider = GeminiProvider(cfg.gemini_api_key)
-        else:
-            self.provider = FakeProvider()
+    def __init__(self, provider: Any | None = None) -> None:
+        # A provider given here (tests) is always used; otherwise the owner's choice, looked up on every call.
+        self._fixed = provider
+        self._gemini: tuple[str, GeminiProvider] | None = None
+        self._fake = FakeProvider()
+
+    @property
+    def provider(self) -> Any:
+        from . import providers, vendors
+
+        if self._fixed is not None:
+            return self._fixed
+        name = providers.provider()
+        key = providers.key(name)
+        if not key:
+            return self._fake
+        if name != "gemini":
+            return vendors.VendorProvider(name)
+        if self._gemini is None or self._gemini[0] != key:
+            self._gemini = (key, GeminiProvider(key))
+        return self._gemini[1]
 
     @property
     def is_live(self) -> bool:
-        return isinstance(self.provider, GeminiProvider)
+        return not isinstance(self.provider, FakeProvider)
 
     @property
     def is_configured(self) -> bool:
@@ -366,7 +383,7 @@ class GeminiService:
         for attempt in range(1, attempts + 1):
             started = time.perf_counter()
             try:
-                result = self.provider.generate(model=model, system=system, prompt=prompt, schema=schema, temperature=temperature, max_output_tokens=max_output_tokens)
+                result: AICallResult = self.provider.generate(model=model, system=system, prompt=prompt, schema=schema, temperature=temperature, max_output_tokens=max_output_tokens)
                 record_usage(model=model, operation=operation, agent_type=agent_type, input_tokens=result.input_tokens, output_tokens=result.output_tokens, latency_ms=result.latency_ms, success=True, session=session)
                 log_event(log, "ai call", operation=operation, model=model, input_tokens=result.input_tokens, output_tokens=result.output_tokens, latency_ms=result.latency_ms, attempt=attempt)
                 return result
@@ -395,7 +412,7 @@ class GeminiService:
             raise AIStructuredOutputInvalid(f"Model output for {operation} did not match {schema.__name__}.") from exc
 
 
-_SECRET_RE = re.compile(r"AIza[0-9A-Za-z_\-]{20,}|(?i:(api[_-]?key|key|token)=)[^&\s'\"]+")
+_SECRET_RE = re.compile(r"AIza[0-9A-Za-z_\-]{20,}|sk-[0-9A-Za-z_\-]{20,}|(?i:(api[_-]?key|key|token)=)[^&\s'\"]+")
 
 
 def error_detail(exc: Exception) -> str:
@@ -436,7 +453,7 @@ def gemini() -> GeminiService:
     return _service
 
 
-def reset_for_tests(provider: GeminiProvider | FakeProvider | None = None) -> GeminiService:
+def reset_for_tests(provider: Any | None = None) -> GeminiService:
     global _service
     _service = GeminiService(provider=provider or FakeProvider())
     return _service

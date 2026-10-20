@@ -1,6 +1,6 @@
 # Control Tower — plan
 
-Status: **approved 2026-10-20** — the owner agreed to every decision in §11. CT0–CT3 done; next: CT4 (Zelyq, when the owner has cloned it). See BUILD_LOG.md.
+Status: **approved 2026-10-20** — the owner agreed to every decision in §11. CT0–CT3, CT5 and CT6 done, and the release docs of CT8: ready for CT4 (Zelyq, when the owner has cloned it). See BUILD_LOG.md.
 
 ## 1. What it is
 
@@ -137,10 +137,10 @@ Search Console / analytics. With these alone the common starter templates alread
 | CT2 | Agent template + rules in the core; hard-coded agents become starter templates | **Done 2026-10-20** |
 | CT3 | Plugin interface (Signals, Records, Actions, pages, templates), versioned and documented, plus the HTTP connector | **Done 2026-10-20** |
 | CT4 | Zelyq (a fresh clone) as the first project on the core; Epliv is not touched | Zelyq's agents work on Control Tower (the proof) |
-| CT5 | Ready-made plugins: Stripe, read-only database, mailbox, social | A project with only Stripe + its database gets useful agents |
-| CT6 | Installer, first-run wizard, updates with backup, provider choice | A founder installs it from the README without help |
+| CT5 | Ready-made plugins: Stripe, read-only database, mailbox, social | **Done 2026-10-20** (Stripe and Database as plugins; the mailbox and social networks are in the core) |
+| CT6 | Installer, first-run wizard, updates with backup, provider choice | **Done 2026-10-20** |
 | CT7 | Role365 on the core as the second project | Two different businesses on one core |
-| CT8 | Public release: docs, website, starter-template gallery | 2–3 founders run it on their own |
+| CT8 | Public release: docs, website, starter-template gallery | Docs and README done 2026-10-20; website and gallery when the owner wants them; 2–3 founders run it on their own |
 
 Each stage: tests (including that no agent can pass a rule in §5), a security review of what changed, the build log.
 

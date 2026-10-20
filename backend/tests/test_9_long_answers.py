@@ -28,7 +28,7 @@ def _db() -> Any:
 @pytest.fixture(autouse=True)
 def clean() -> Iterator[None]:
     yield
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
     with _db() as db:
         db.execute(delete(TeamConversation))
         db.execute(delete(AIUsage).where(AIUsage.operation.like("agent.%")))
@@ -72,7 +72,7 @@ def test_an_empty_answer_from_the_model_is_asked_again_instead_of_ending_the_run
     monkeypatch.setattr(settings(), "gemini_api_key", "test-key")
     called: list[str] = []
     rounds: list[int] = []
-    out = runner.GeminiModel().converse(tier="fast", system="s", prompt="p", declarations=[{"name": "video_studio", "description": "d", "parameters": {"type": "OBJECT", "properties": {}}},
+    out = runner.ProviderModel().converse(tier="fast", system="s", prompt="p", declarations=[{"name": "video_studio", "description": "d", "parameters": {"type": "OBJECT", "properties": {}}},
                                                                                          {"name": "propose", "description": "d", "parameters": {"type": "OBJECT", "properties": {}}}],
                                         call_tool=lambda name, args: called.append(name) or {"ok": True}, before_round=lambda: rounds.append(1),
                                         on_usage=lambda u: None, max_rounds=8)

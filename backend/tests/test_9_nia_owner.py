@@ -41,7 +41,7 @@ def clean() -> Iterator[None]:
         db.execute(delete(AIUsage).where(AIUsage.operation.like("agent.%")))
         db.execute(delete(PlatformSetting).where(PlatformSetting.key == "agents"))
     yield
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def _ready() -> None:

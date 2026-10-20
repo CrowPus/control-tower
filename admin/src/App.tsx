@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, BarChart3, UserRound, Bot, ClipboardList, Cpu, Gauge, Inbox, ListChecks, LogOut, Mail, Server, ShieldCheck, SlidersHorizontal, Sparkles, BookOpen, Mailbox, Megaphone, Network, Building, FlaskConical, ShieldAlert, Plug } from "lucide-react";
+import { Activity, BarChart3, UserRound, Bot, ClipboardList, Cpu, Gauge, Inbox, ListChecks, LogOut, Mail, Server, ShieldCheck, SlidersHorizontal, Sparkles, BookOpen, Mailbox, Megaphone, Network, Building, FlaskConical, ShieldAlert, Plug, Rocket } from "lucide-react";
 import { Suspense, lazy, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, Navigate, Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 import { NotificationBell, type BellItem } from "./Bell";
@@ -24,6 +24,7 @@ import { MailboxesPage } from "./team/Mailboxes";
 import { OutsideAgentPage, OutsidePage } from "./team/Outside";
 import { TeamPage } from "./team/Team";
 import { PluginsPage } from "./pages/Plugins";
+import { WelcomePage, useSetup } from "./pages/Welcome";
 import { api, errorMessage, onSignedOut, setCsrfToken, unwrap } from "./api";
 import { AdminLogPage } from "./pages/AdminLog";
 import { AdminsPage } from "./pages/Admins";
@@ -244,7 +245,9 @@ function Shell({ me, children }: { me: Me; children: ReactNode }) {
   const client = useQueryClient();
   // New mail in the inboxes this admin may open (Admin → Mail).
   const mailUnread = useQuery({ queryKey: ["mail", "unread"], queryFn: async () => unwrap(await api.GET("/admin-api/mail/unread")), refetchInterval: 60_000 }).data?.unread ?? 0;
-  const nav = me.admin.role === "owner" ? [...NAV, { to: "/admins", label: "Admins", icon: ShieldCheck }] : NAV;
+  const setup = useSetup().data;
+  const start = setup && !setup.finished ? [{ to: "/welcome", label: "Getting started", icon: Rocket, end: true }] : [];
+  const nav = [...start, ...(me.admin.role === "owner" ? [...NAV, { to: "/admins", label: "Admins", icon: ShieldCheck }] : NAV)];
   return (
     <div className="min-h-screen bg-bg md:grid md:grid-cols-[220px_1fr]">
       <aside className="border-b border-border bg-surface md:sticky md:top-0 md:flex md:h-screen md:flex-col md:border-b-0 md:border-r">
@@ -298,6 +301,13 @@ function Shell({ me, children }: { me: Me; children: ReactNode }) {
   );
 }
 
+/** The start page: Getting started until the setup is finished, then Insights. */
+function Home() {
+  const { data } = useSetup();
+  if (!data) return null;
+  return <Navigate to={data.finished ? "/insights" : "/welcome"} replace />;
+}
+
 export function App() {
   const client = useQueryClient();
   const { data: me, isLoading, refetch } = useMe();
@@ -325,7 +335,8 @@ export function App() {
           ) : (
             <Shell me={me}>
               <Routes>
-                <Route index element={<Navigate to="/insights" replace />} />
+                <Route index element={<Home />} />
+                <Route path="welcome" element={<WelcomePage owner={me.admin.role === "owner"} />} />
                 <Route path="insights/*" element={<InsightsArea owner={me.admin.role === "owner"} />} />
                 <Route path="nia" element={<NiaPage owner={me.admin.role === "owner"} />} />
                 <Route path="nia/meetings/:id" element={<MeetingPage owner={me.admin.role === "owner"} />} />

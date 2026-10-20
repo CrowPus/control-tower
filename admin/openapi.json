@@ -1,6 +1,168 @@
 {
   "components": {
     "schemas": {
+      "AIIn": {
+        "properties": {
+          "keys": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "propertyNames": {
+              "enum": [
+                "gemini",
+                "anthropic",
+                "openai"
+              ]
+            },
+            "title": "Keys",
+            "type": "object"
+          },
+          "models": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ModelsIn"
+            },
+            "propertyNames": {
+              "enum": [
+                "gemini",
+                "anthropic",
+                "openai"
+              ]
+            },
+            "title": "Models",
+            "type": "object"
+          },
+          "openai_base_url": {
+            "default": "",
+            "maxLength": 300,
+            "title": "Openai Base Url",
+            "type": "string"
+          },
+          "prices": {
+            "additionalProperties": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Prices",
+            "type": "object"
+          },
+          "provider": {
+            "enum": [
+              "gemini",
+              "anthropic",
+              "openai"
+            ],
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider"
+        ],
+        "title": "AIIn",
+        "type": "object"
+      },
+      "AIOut": {
+        "properties": {
+          "configured": {
+            "title": "Configured",
+            "type": "boolean"
+          },
+          "gemini_key": {
+            "title": "Gemini Key",
+            "type": "boolean"
+          },
+          "gemini_only": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Gemini Only",
+            "type": "array"
+          },
+          "openai_base_url": {
+            "title": "Openai Base Url",
+            "type": "string"
+          },
+          "prices": {
+            "additionalProperties": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Prices",
+            "type": "object"
+          },
+          "provider": {
+            "enum": [
+              "gemini",
+              "anthropic",
+              "openai"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderOut"
+            },
+            "title": "Providers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "provider",
+          "configured",
+          "providers",
+          "prices",
+          "openai_base_url",
+          "gemini_only",
+          "gemini_key"
+        ],
+        "title": "AIOut",
+        "type": "object"
+      },
+      "AITestOut": {
+        "properties": {
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "integer"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "provider",
+          "model",
+          "latency_ms",
+          "message"
+        ],
+        "title": "AITestOut",
+        "type": "object"
+      },
       "AIUsageOut": {
         "properties": {
           "by_model": {
@@ -1718,6 +1880,28 @@
           "problems"
         ],
         "title": "CollectOut",
+        "type": "object"
+      },
+      "CompanyIn": {
+        "properties": {
+          "about": {
+            "maxLength": 2000,
+            "minLength": 20,
+            "title": "About",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "about"
+        ],
+        "title": "CompanyIn",
         "type": "object"
       },
       "ConnectionIn": {
@@ -4167,6 +4351,24 @@
         "title": "MessageSummary",
         "type": "object"
       },
+      "ModelsIn": {
+        "properties": {
+          "fast": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Fast",
+            "type": "string"
+          },
+          "reasoning": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Reasoning",
+            "type": "string"
+          }
+        },
+        "title": "ModelsIn",
+        "type": "object"
+      },
       "NiaBriefOut": {
         "properties": {
           "at": {
@@ -6578,6 +6780,11 @@
             "title": "Label",
             "type": "string"
           },
+          "long": {
+            "default": false,
+            "title": "Long",
+            "type": "boolean"
+          },
           "required": {
             "title": "Required",
             "type": "boolean"
@@ -6783,6 +6990,59 @@
           "note"
         ],
         "title": "PresetOut",
+        "type": "object"
+      },
+      "ProviderOut": {
+        "properties": {
+          "default_fast_model": {
+            "title": "Default Fast Model",
+            "type": "string"
+          },
+          "default_reasoning_model": {
+            "title": "Default Reasoning Model",
+            "type": "string"
+          },
+          "fast_model": {
+            "title": "Fast Model",
+            "type": "string"
+          },
+          "key": {
+            "enum": [
+              "gemini",
+              "anthropic",
+              "openai"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "key_source": {
+            "enum": [
+              "admin",
+              "environment",
+              "none"
+            ],
+            "title": "Key Source",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "reasoning_model": {
+            "title": "Reasoning Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "key_source",
+          "reasoning_model",
+          "fast_model",
+          "default_reasoning_model",
+          "default_fast_model"
+        ],
+        "title": "ProviderOut",
         "type": "object"
       },
       "QaCheckOut": {
@@ -7297,6 +7557,60 @@
           "created_at"
         ],
         "title": "SessionRow",
+        "type": "object"
+      },
+      "SetupOut": {
+        "properties": {
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/SetupStep"
+            },
+            "title": "Steps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "finished",
+          "steps"
+        ],
+        "title": "SetupOut",
+        "type": "object"
+      },
+      "SetupStep": {
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "done",
+          "required",
+          "detail"
+        ],
+        "title": "SetupStep",
         "type": "object"
       },
       "SignatureIn": {
@@ -9917,6 +10231,66 @@
         ]
       }
     },
+    "/admin-api/ai": {
+      "get": {
+        "operationId": "get_ai_admin_api_ai_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Ai",
+        "tags": [
+          "admin-ai"
+        ]
+      },
+      "put": {
+        "operationId": "put_ai_admin_api_ai_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Ai",
+        "tags": [
+          "admin-ai"
+        ]
+      }
+    },
     "/admin-api/ai-usage": {
       "get": {
         "operationId": "ai_usage_admin_api_ai_usage_get",
@@ -9957,6 +10331,28 @@
         "summary": "Ai Usage",
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/admin-api/ai/test": {
+      "post": {
+        "description": "One short answer from the chosen provider's fast model: the key, the model name and the address work.",
+        "operationId": "test_ai_admin_api_ai_test_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AITestOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Test Ai",
+        "tags": [
+          "admin-ai"
         ]
       }
     },
@@ -17137,6 +17533,89 @@
         "summary": "Patch Schedule",
         "tags": [
           "admin"
+        ]
+      }
+    },
+    "/admin-api/setup": {
+      "get": {
+        "operationId": "get_setup_admin_api_setup_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Setup",
+        "tags": [
+          "admin-ai"
+        ]
+      }
+    },
+    "/admin-api/setup/company": {
+      "put": {
+        "operationId": "put_company_admin_api_setup_company_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Company",
+        "tags": [
+          "admin-ai"
+        ]
+      }
+    },
+    "/admin-api/setup/finish": {
+      "post": {
+        "operationId": "finish_setup_admin_api_setup_finish_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Finish Setup",
+        "tags": [
+          "admin-ai"
         ]
       }
     },

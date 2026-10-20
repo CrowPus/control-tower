@@ -27,6 +27,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
+from ...ai.providers import gemini_key
 from ...config import settings
 from ...core.logging import get_logger
 from ...models import AIUsage, NiaConversation, NiaMessage
@@ -257,10 +258,10 @@ async def relay(socket: WebSocket, held: Lease, db: tools.DbFactory, *, connect:
         )
         opener = connect or CONNECT
         if opener is None:
-            if not cfg.gemini_api_key:
+            if not gemini_key():
                 await emit("error", message="No AI key is configured on the server.")
                 return
-            opener = genai.Client(api_key=cfg.gemini_api_key, http_options=types.HttpOptions(timeout=30_000)).aio.live.connect
+            opener = genai.Client(api_key=gemini_key(), http_options=types.HttpOptions(timeout=30_000)).aio.live.connect
         async with opener(model=cfg.gemini_live_model, config=live_config) as connection:
             await emit("ready")
             opening = ("The meeting starts now. Greet me in one sentence, then present the deck from slide 1 (call show_slide)." if held.meeting_id

@@ -37,7 +37,7 @@ def clean() -> Iterator[None]:
         for model in (TeamRun, TeamEvent, TeamConversation, NiaConversation):
             db.execute(delete(model))
         db.execute(delete(PlatformSetting).where(PlatformSetting.key == "agents"))
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def _ready(*keys: str) -> None:

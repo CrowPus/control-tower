@@ -56,6 +56,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin-api/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Ai */
+        get: operations["get_ai_admin_api_ai_get"];
+        /** Put Ai */
+        put: operations["put_ai_admin_api_ai_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin-api/ai-usage": {
         parameters: {
             query?: never;
@@ -67,6 +85,26 @@ export interface paths {
         get: operations["ai_usage_admin_api_ai_usage_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/ai/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Ai
+         * @description One short answer from the chosen provider's fast model: the key, the model name and the address work.
+         */
+        post: operations["test_ai_admin_api_ai_test_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2746,6 +2784,57 @@ export interface paths {
         patch: operations["patch_schedule_admin_api_schedules__job_id__patch"];
         trace?: never;
     };
+    "/admin-api/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Setup */
+        get: operations["get_setup_admin_api_setup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/setup/company": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Company */
+        put: operations["put_company_admin_api_setup_company_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/setup/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finish Setup */
+        post: operations["finish_setup_admin_api_setup_finish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin-api/system": {
         parameters: {
             query?: never;
@@ -3307,6 +3396,66 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AIIn */
+        AIIn: {
+            /** Keys */
+            keys?: {
+                [key: string]: string | null;
+            };
+            /** Models */
+            models?: {
+                [key: string]: components["schemas"]["ModelsIn"];
+            };
+            /**
+             * Openai Base Url
+             * @default
+             */
+            openai_base_url: string;
+            /** Prices */
+            prices?: {
+                [key: string]: number[];
+            };
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "gemini" | "anthropic" | "openai";
+        };
+        /** AIOut */
+        AIOut: {
+            /** Configured */
+            configured: boolean;
+            /** Gemini Key */
+            gemini_key: boolean;
+            /** Gemini Only */
+            gemini_only: string[];
+            /** Openai Base Url */
+            openai_base_url: string;
+            /** Prices */
+            prices: {
+                [key: string]: number[];
+            };
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "gemini" | "anthropic" | "openai";
+            /** Providers */
+            providers: components["schemas"]["ProviderOut"][];
+        };
+        /** AITestOut */
+        AITestOut: {
+            /** Latency Ms */
+            latency_ms: number;
+            /** Message */
+            message: string;
+            /** Model */
+            model: string;
+            /** Ok */
+            ok: boolean;
+            /** Provider */
+            provider: string;
+        };
         /** AIUsageOut */
         AIUsageOut: {
             /** By Model */
@@ -4050,6 +4199,13 @@ export interface components {
             problems: {
                 [key: string]: string[];
             };
+        };
+        /** CompanyIn */
+        CompanyIn: {
+            /** About */
+            about: string;
+            /** Name */
+            name: string;
         };
         /** ConnectionIn */
         ConnectionIn: {
@@ -4956,6 +5112,19 @@ export interface components {
             thread_key: string;
             /** To */
             to: string[][];
+        };
+        /** ModelsIn */
+        ModelsIn: {
+            /**
+             * Fast
+             * @default
+             */
+            fast: string;
+            /**
+             * Reasoning
+             * @default
+             */
+            reasoning: string;
         };
         /** NiaBriefOut */
         NiaBriefOut: {
@@ -5872,6 +6041,11 @@ export interface components {
             key: string;
             /** Label */
             label: string;
+            /**
+             * Long
+             * @default false
+             */
+            long: boolean;
             /** Required */
             required: boolean;
             /** Secret */
@@ -5941,6 +6115,29 @@ export interface components {
             smtp_port: number;
             /** Smtp Security */
             smtp_security: string;
+        };
+        /** ProviderOut */
+        ProviderOut: {
+            /** Default Fast Model */
+            default_fast_model: string;
+            /** Default Reasoning Model */
+            default_reasoning_model: string;
+            /** Fast Model */
+            fast_model: string;
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "gemini" | "anthropic" | "openai";
+            /**
+             * Key Source
+             * @enum {string}
+             */
+            key_source: "admin" | "environment" | "none";
+            /** Label */
+            label: string;
+            /** Reasoning Model */
+            reasoning_model: string;
         };
         /** QaCheckOut */
         QaCheckOut: {
@@ -6135,6 +6332,26 @@ export interface components {
             result: string;
             /** Status */
             status: string;
+        };
+        /** SetupOut */
+        SetupOut: {
+            /** Finished */
+            finished: boolean;
+            /** Steps */
+            steps: components["schemas"]["SetupStep"][];
+        };
+        /** SetupStep */
+        SetupStep: {
+            /** Detail */
+            detail: string;
+            /** Done */
+            done: boolean;
+            /** Key */
+            key: string;
+            /** Required */
+            required: boolean;
+            /** Title */
+            title: string;
         };
         /** SignatureIn */
         SignatureIn: {
@@ -7238,6 +7455,59 @@ export interface operations {
             };
         };
     };
+    get_ai_admin_api_ai_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIOut"];
+                };
+            };
+        };
+    };
+    put_ai_admin_api_ai_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AIIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     ai_usage_admin_api_ai_usage_get: {
         parameters: {
             query?: {
@@ -7265,6 +7535,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_ai_admin_api_ai_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AITestOut"];
                 };
             };
         };
@@ -12418,6 +12708,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_setup_admin_api_setup_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupOut"];
+                };
+            };
+        };
+    };
+    put_company_admin_api_setup_company_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    finish_setup_admin_api_setup_finish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupOut"];
                 };
             };
         };

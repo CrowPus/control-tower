@@ -6,13 +6,9 @@ Prints a one-time link (valid 72 hours) where the owner sets their password;
 their first sign-in then sets up the authenticator app. Nothing here can create
 an admin without that link being followed.
 
-    .venv/bin/python -m app.admin_cli load-employer-documents   (in the admin container: it needs the admin database role)
+    python -m app.admin_cli has-owner
 
-Adds the employer contract texts in app/legal/employer as drafts (version
-2026-10-01). An admin owner reads and approves them in Admin → Commercial; a
-version already there is left alone.
-
-    .venv/bin/python -m app.admin_cli load-routed-terms   (the same, for the routed slot terms; German, like every contract text)
+Exits 0 when an owner admin exists (the installer asks before inviting another), 1 when none does.
 """
 
 from __future__ import annotations
@@ -30,7 +26,16 @@ def main(argv: list[str] | None = None) -> None:
     create = sub.add_parser("create-owner", help="invite an owner admin and print the set-up link")
     create.add_argument("--email", required=True)
     create.add_argument("--name", required=True)
+    sub.add_parser("has-owner", help="exit 0 when an owner admin exists")
     args = parser.parse_args(argv)
+    if args.command == "has-owner":
+        from sqlalchemy import select
+
+        from .models import AdminUser
+
+        with admin_transaction() as session:
+            found = session.execute(select(AdminUser.id).where(AdminUser.role == "owner").limit(1)).first()
+        raise SystemExit(0 if found else 1)
     if args.command == "create-owner":
         from email_validator import EmailNotValidError, validate_email
 
@@ -49,7 +54,10 @@ def main(argv: list[str] | None = None) -> None:
             system_mail.send("admin_invitation", to=email, name=args.name, locale="en", link=link)
             print("The set-up link was e-mailed to that address.")
         except Exception as exc:  # noqa: BLE001 - the printed link still works
-            print(f"Could not e-mail the link ({exc.__class__.__name__}).")
+            if system_mail.is_configured():
+                print(f"Could not e-mail the link ({exc.__class__.__name__}); use the link below.")
+            else:
+                print("No mailbox is set up for the install yet (SMTP_* in .env), so the link is not e-mailed: use it below.")
         print(f"Set the password here (valid 72 hours): {link}")
 
 

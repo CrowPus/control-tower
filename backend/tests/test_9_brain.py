@@ -57,7 +57,7 @@ def seeded() -> Iterator[dict[str, int]]:
         db.execute(delete(TeamAgentState))
         db.execute(delete(PlatformSetting).where(PlatformSetting.key == "agents"))
         db.execute(delete(AIUsage).where(AIUsage.operation.like("agent.%")))
-    runner.use_model(runner.GeminiModel())
+    runner.use_model(runner.ProviderModel())
 
 
 def _links(g: brain.Graph) -> set[tuple[str, str, str]]:

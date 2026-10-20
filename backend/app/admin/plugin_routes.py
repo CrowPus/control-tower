@@ -28,6 +28,7 @@ class PluginSettingOut(BaseModel):
     hint: str
     secret: bool
     required: bool
+    long: bool = False
     set: bool
     # Plain settings only; a secret's value is never sent back.
     value: str | None = None
@@ -125,7 +126,7 @@ def _out(key: str) -> PluginOut:
                  for n in loaded.actions if n in registry.ACTIONS],
         metrics=[PluginPartOut(key=n, label=m.label) for n, m in zip(loaded.kpis, p.metrics, strict=False)],
         templates=[PluginPartOut(key=n, label=t.name) for n, t in ((n, _template(n)) for n in loaded.templates) if t is not None],
-        settings=[PluginSettingOut(key=s.key, label=s.label, hint=s.hint, secret=s.secret, required=s.required, set=stored.get(s.key) not in (None, ""),
+        settings=[PluginSettingOut(key=s.key, label=s.label, hint=s.hint, secret=s.secret, required=s.required, long=s.long, set=stored.get(s.key) not in (None, ""),
                                    value=None if s.secret else (str(stored.get(s.key)) if stored.get(s.key) is not None else None)) for s in p.settings],
         warnings=loaded.warnings, collected_at=collected.get("at"), collect_errors=list(collected.get("errors") or []),
     )
