@@ -162,5 +162,7 @@ Each stage: tests (including that no agent can pass a rule in §5), a security r
 - **D2** New repo `CrowPus/control-tower` on GitHub (the owner creates it; pushing needs the owner's token).
 - **D3** Nia is part of the core (the chief of staff who helps build agents) *(recommended)*, not a template.
 - **D4** Starter templates from Epliv's team, in a gallery *(recommended)*.
-- **D5** Words: keep "Approvals" or call it "Clearance" (agents request clearance, the tower gives it) to fit the name.
-- **D6** Domain for the website and docs.
+- **D5** ~~Words: keep "Approvals" or call it "Clearance"~~ — **decided 2026-10-20: "Clearance"** (agents request
+  clearance, the owner gives it). Admin → Approvals becomes Admin → Clearance in the core.
+- **D6** ~~Domain for the website and docs~~ — **decided 2026-10-20: no domain for now**; docs live in the repo and in
+  Admin → Docs.
