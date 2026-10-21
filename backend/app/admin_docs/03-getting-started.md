@@ -16,6 +16,6 @@ After the install, the first owner to sign in sees **Getting started**. It lists
 3. **The team's switch and budget** (needed) — the team switched on, the language agents write to you in, and a daily AI budget. Later: [Team](docs:team).
 4. **E-mail for the install** (optional) — set in the server's .env file (SMTP): invitations for other admins, alerts and the Monday report. Without it, alerts appear in the bell.
 5. **Your first agent** (optional) — Team → **New agent**, blank or from a starter template.
-6. **Your project connected** (optional) — [Plugins](docs:plugins).
+6. **Your project connected** (optional) — [Connect your project](docs:connect-your-project): a guided way, with the message for your coding agent.
 
 **Finish** is possible once the needed steps are done; the page then leaves the menu. Nothing is switched on for you: each agent starts off until you give it its settings.

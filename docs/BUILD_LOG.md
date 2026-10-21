@@ -186,3 +186,29 @@ fetched its manifest (6 tools, 1 action, 6 numbers, 2 templates), switched it on
 e-mail and name hidden; numbers were collected into Insights; a sign-up in Zelyq arrived as the event `zelyq.signup`;
 an agent was made from the Release Guard template; a proposal to re-run a run that does not exist was refused by
 Zelyq's own check.
+
+## Guidance for owners who are not developers (2026-10-21)
+
+The owner tried the install as a non-developer would and was lost: having only their product and Control Tower, what
+next? Control Tower now explains itself, and hands a coding agent everything it needs.
+
+- **docs/GUIDE.md** — the plain-language guide: what it is in one minute, the words used, the first hour (install,
+  Getting started, connecting the product, the first agent), day to day, a "when something is wrong" table, safety in
+  plain words, Zelyq as the worked example. Linked from the top of the README.
+- **docs/CONNECT-A-PROJECT.md** — the brief for the project's coding agent (Claude Code, Cursor, Copilot, Lovable …)
+  or developer: complete on its own (works for agents that cannot open links): ground rules (read-only first, ask the
+  owner before choosing what to expose, personal fields, the secret only in the environment, the project's own data
+  access and permissions, never trust input, never wait on Control Tower), the plan, the protocol, signing, events,
+  reference code for Node (Express) and Python (FastAPI), the self-test, the hand-over in plain words. Both reference
+  implementations were run as written and pass the check.
+- **tools/check_connection.py** — standard library only: unsigned and wrong signatures refused, manifest valid,
+  every metric a number, every tool a JSON object; PASS/FAIL with what to fix. Run against Zelyq: all pass.
+- **Admin → Plugins → Connect your project** (`/plugins/connect`, and `/plugins/connect/<key>` to continue): what the
+  project is (app or website / Stripe / database / Python), name and address, the three settings with the one-time
+  secret, the brief to download (with this connection's details on top) and the message to paste into the coding
+  agent (with the owner's own words on what agents should see), **Check the connection** (`POST
+  /admin-api/plugins/connections/<key>/check`) which explains each failure in plain words — cannot reach, redirected,
+  nothing at /manifest, answers without checking the signature (refused as unsafe), secrets differ, manifest not
+  right — and then switch on and make an agent. Connected projects' cards lead back to it (Setup and check).
+- Admin → Docs: "Connect your project"; Getting started's project step leads to it.
+- The kit (brief and check script) is in the image (`/app/docs`, `/app/tools`).

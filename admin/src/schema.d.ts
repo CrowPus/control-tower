@@ -2508,6 +2508,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin-api/plugins/connect-kit/brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Connect Brief
+         * @description The brief for the project's coding agent, with this connection's details on top.
+         */
+        get: operations["connect_brief_admin_api_plugins_connect_kit_brief_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/plugins/connect-kit/check-script": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Connect Check Script */
+        get: operations["connect_check_script_admin_api_plugins_connect_kit_check_script_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin-api/plugins/connections": {
         parameters: {
             query?: never;
@@ -2537,6 +2574,26 @@ export interface paths {
         post?: never;
         /** Remove Connection */
         delete: operations["remove_connection_admin_api_plugins_connections__key__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin-api/plugins/connections/{key}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check Connection
+         * @description Ask the project the way Control Tower will, and say in plain words what is wrong; when all is right, take what it offers.
+         */
+        post: operations["check_connection_admin_api_plugins_connections__key__check_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4187,6 +4244,18 @@ export interface components {
              * @default
              */
             who: string;
+        };
+        /** CheckOut */
+        CheckOut: {
+            /** Hint */
+            hint: string;
+            /** Message */
+            message: string;
+            /** Ok */
+            ok: boolean;
+            plugins: components["schemas"]["PluginsOut"];
+            /** Step */
+            step: string;
         };
         /** CodeIn */
         CodeIn: {
@@ -6057,6 +6126,15 @@ export interface components {
         };
         /** PluginsOut */
         PluginsOut: {
+            /** Connections */
+            connections?: {
+                [key: string]: string;
+            };
+            /**
+             * Control Tower Url
+             * @default
+             */
+            control_tower_url: string;
             /** Events Address */
             events_address: string;
             /** Plugins */
@@ -12220,6 +12298,58 @@ export interface operations {
             };
         };
     };
+    connect_brief_admin_api_plugins_connect_kit_brief_get: {
+        parameters: {
+            query?: {
+                key?: string;
+                base_url?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    connect_check_script_admin_api_plugins_connect_kit_check_script_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+        };
+    };
     add_connection_admin_api_plugins_connections_post: {
         parameters: {
             query?: never;
@@ -12271,6 +12401,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PluginsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_connection_admin_api_plugins_connections__key__check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckOut"];
                 };
             };
             /** @description Validation Error */

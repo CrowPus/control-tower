@@ -128,7 +128,7 @@ function TeamStep({ owner }: { owner: boolean }) {
 
 const LINKS: Record<string, { to: string; label: string }> = {
   agent: { to: "/team/new", label: "Make an agent" },
-  project: { to: "/plugins", label: "Open Plugins" },
+  project: { to: "/plugins/connect", label: "Connect it" },
   mail: { to: "/docs/getting-started", label: "How" },
 };
 

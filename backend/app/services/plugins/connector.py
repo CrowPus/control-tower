@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import time
+from dataclasses import dataclass
 from typing import Any, Literal
 from urllib.parse import quote, urlparse
 
@@ -157,6 +158,60 @@ def fetch_manifest(key: str, url: str, secret: str) -> dict[str, Any]:
         raise core.PluginError(f"The manifest says its key is {manifest.key!r}; this connection is {key!r}.")
     core.validate(build(key, url, manifest.model_dump()))
     return manifest.model_dump()
+
+
+@dataclass
+class Diagnosis:
+    """What "Check the connection" found, for someone who is not a developer: the step that failed, what it means,
+    and what to do."""
+
+    ok: bool
+    step: Literal["secret", "reach", "address", "routes", "unsigned", "signature", "manifest", "ok"]
+    message: str
+    hint: str = ""
+    manifest: dict[str, Any] | None = None
+
+
+def diagnose(key: str, url: str, secret: str) -> Diagnosis:
+    """Ask the project for its manifest the way Control Tower will, and explain the first thing that is wrong."""
+    if not secret:
+        return Diagnosis(False, "secret", "Control Tower has no shared secret for this connection.",
+                         "Press New secret, then put it in your project's settings as CONTROL_TOWER_SECRET.")
+    target = f"{url}/manifest"
+    try:
+        with httpx.Client(timeout=TIMEOUT_SECONDS, transport=TRANSPORT, follow_redirects=False) as client:
+            unsigned = client.get(target, headers={"Accept": "application/json"})
+            signed = client.get(target, headers={"Accept": "application/json", signing.HEADER: signing.sign(secret, urlparse(target).path, b"")})
+    except httpx.TimeoutException:
+        return Diagnosis(False, "reach", f"Your project did not answer at {url} within {int(TIMEOUT_SECONDS)} seconds.",
+                         "Is it running? Is the address right? A project on your own computer cannot be reached from this server.")
+    except httpx.HTTPError:
+        return Diagnosis(False, "reach", f"Control Tower cannot reach {url}.",
+                         "Check the address (https://, spelling, the path). Is your project deployed and running? Open the address followed by "
+                         "/manifest in your browser: a page saying \"refused\" means the address is right.")
+    if unsigned.is_redirect:
+        return Diagnosis(False, "address", f"{url} sends visitors on to {unsigned.headers.get('location', 'another address')}.",
+                         "Use the final address instead (often https:// instead of http://, or with or without www).")
+    if unsigned.status_code in (404, 405):
+        return Diagnosis(False, "routes", f"Your project answers, but has nothing at {target}.",
+                         "The Control Tower part is not deployed yet, CONTROL_TOWER_SECRET is not set in your project (it switches the part "
+                         "on), or the part lives under another path than this address.")
+    if unsigned.status_code >= 500:
+        return Diagnosis(False, "routes", f"Your project failed when asked ({unsigned.status_code}).", "Look at your project's logs for the error.")
+    if unsigned.status_code < 300:
+        return Diagnosis(False, "unsigned", "Your project answers without checking who is asking.",
+                         "It must refuse requests without Control Tower's signature (CONNECT-A-PROJECT.md → Signing). Ask your coding agent to add the check.")
+    if signed.status_code == 401:
+        return Diagnosis(False, "signature", "Your project refuses Control Tower's signature: the shared secrets are not the same.",
+                         "Put the secret again into your project's CONTROL_TOWER_SECRET and restart it — or press New secret and use that one. "
+                         "If the secret surely matches, a proxy may change the address your project sees.")
+    if signed.status_code != 200:
+        return Diagnosis(False, "routes", f"Your project answered {signed.status_code} to Control Tower's signed request.", "Look at your project's logs for the error.")
+    try:
+        return Diagnosis(True, "ok", "Connected.", manifest=fetch_manifest(key, url, secret))
+    except core.PluginError as exc:
+        return Diagnosis(False, "manifest", f"Your project answers, but what it offers is not right: {exc}",
+                         "Give this sentence to your coding agent; the manifest's rules are in CONNECT-A-PROJECT.md.")
 
 
 def build(key: str, url: str, raw: dict[str, Any]) -> Plugin:

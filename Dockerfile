@@ -15,6 +15,9 @@ COPY backend/ ./
 COPY --from=admin /app/dist-admin /app/dist-admin
 # The install's Python plugins (docker-compose mounts ./plugins over it, so adding one needs no new image).
 COPY plugins /app/plugins
+# The connection kit the admin hands to a project's coding agent (Plugins → Connect your project).
+COPY docs/CONNECT-A-PROJECT.md /app/docs/CONNECT-A-PROJECT.md
+COPY tools/check_connection.py /app/tools/check_connection.py
 # /data: the install's files; /marketing: the videos the studio made, their own volume.
 RUN useradd --uid 10001 --create-home app && mkdir -p /data /marketing && chown app:app /data /marketing
 USER app

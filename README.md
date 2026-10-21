@@ -9,6 +9,9 @@
 
 Your own AI team, on your own server.
 
+**New here, and not a developer?** Read [the guide](docs/GUIDE.md): what it is in plain words, your first hour, and
+how to connect your product — with your coding agent doing the code.
+
 Control Tower is a self-hosted admin and agent office for founders. You install it next to your project, connect your
 project through a plugin, and build the agents you want from one template: a name, a job, the tools they may use and
 the actions they may propose. You decide what each agent is. Control Tower decides only one thing: every agent follows
@@ -84,7 +87,7 @@ the admin's bell.
 
 ## Connect your project
 
-Admin → **Plugins**. Three ways:
+Admin → **Plugins → Connect your project** walks you through it and writes the message for your coding agent. Three ways:
 
 - **Ready to use:** Stripe (read-only: subscriptions, payments, revenue) and Database (your PostgreSQL or MySQL,
   read-only, with the questions you write as SQL). Switch them on and fill in their settings.
@@ -92,7 +95,8 @@ Admin → **Plugins**. Three ways:
   **Connect a project**, put the shared secret into your project, press **Fetch**.
 - **A Python plugin:** a folder in `plugins/`, then restart (`docker compose restart app worker`).
 
-How to write one: [docs/PLUGINS.md](docs/PLUGINS.md), with a complete example in
+For the coding agent or developer doing it: [docs/CONNECT-A-PROJECT.md](docs/CONNECT-A-PROJECT.md) (the brief) and
+[docs/PLUGINS.md](docs/PLUGINS.md) (the reference), with a complete example in
 [examples/plugins/hello_shop](examples/plugins/hello_shop/plugin.py).
 
 ## Backups and updates

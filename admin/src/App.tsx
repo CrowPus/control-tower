@@ -23,6 +23,7 @@ import { ApprovalsPage } from "./team/Approvals";
 import { MailboxesPage } from "./team/Mailboxes";
 import { OutsideAgentPage, OutsidePage } from "./team/Outside";
 import { TeamPage } from "./team/Team";
+import { ConnectProjectPage } from "./pages/ConnectProject";
 import { PluginsPage } from "./pages/Plugins";
 import { WelcomePage, useSetup } from "./pages/Welcome";
 import { api, errorMessage, onSignedOut, setCsrfToken, unwrap } from "./api";
@@ -345,6 +346,8 @@ export function App() {
                 <Route path="office" element={<Suspense fallback={<p className="text-[13px] text-muted">Opening the office…</p>}><OfficePage /></Suspense>} />
                 <Route path="brain" element={<BrainPage owner={me.admin.role === "owner"} />} />
                 <Route path="plugins" element={<PluginsPage owner={me.admin.role === "owner"} />} />
+                <Route path="plugins/connect" element={me.admin.role === "owner" ? <ConnectProjectPage /> : <Navigate to="/plugins" replace />} />
+                <Route path="plugins/connect/:key" element={me.admin.role === "owner" ? <ConnectProjectPage /> : <Navigate to="/plugins" replace />} />
                 <Route path="team" element={<TeamPage owner={me.admin.role === "owner"} />} />
                 <Route path="team/new" element={me.admin.role === "owner" ? <NewAgentPage /> : <Navigate to="/team" replace />} />
                 <Route path="team/mailboxes" element={<MailboxesPage owner={me.admin.role === "owner"} />} />

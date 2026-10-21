@@ -4,6 +4,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Plug, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, unwrap, type Schemas } from "../api";
 import { useAction } from "../hooks";
 import { Alert, Badge, Button, Card, Dialog, Empty, Field, Input, PageTitle, Textarea, Toggle, ago } from "../ui";
@@ -80,7 +81,10 @@ function PluginCard({ plugin, owner, onSecret }: { plugin: PluginOut; owner: boo
   const dirty = Object.keys(values).length > 0;
   return (
     <Card className="mt-4" title={<span className="flex flex-wrap items-center gap-2">{plugin.name}<Badge>{plugin.source === "http" ? "HTTP" : "Python"}</Badge><Badge>v{plugin.version}</Badge>{plugin.enabled ? <Badge tone="success">On</Badge> : <Badge>Off</Badge>}</span>}
-      actions={owner && plugin.source === "http" && <Button size="sm" loading={fetch.busy} onClick={() => fetch.run(undefined)}><RefreshCw className="h-3.5 w-3.5" aria-hidden />Fetch</Button>}>
+      actions={owner && plugin.source === "http" && <>
+        <Link to={`/plugins/connect/${plugin.key}`}><Button size="sm">Setup and check</Button></Link>
+        <Button size="sm" loading={fetch.busy} onClick={() => fetch.run(undefined)}><RefreshCw className="h-3.5 w-3.5" aria-hidden />Fetch</Button>
+      </>}>
       {notice && <div className="mb-3"><Alert tone={notice.tone}>{notice.text}</Alert></div>}
       {plugin.description && <p className="mb-2 text-[13px] text-muted">{plugin.description}</p>}
       <p className="mb-3 break-all text-xs text-subtle">{plugin.key} · {plugin.location}</p>
@@ -148,44 +152,24 @@ function PluginCard({ plugin, owner, onSecret }: { plugin: PluginOut; owner: boo
   );
 }
 
-function ConnectDialog({ open, onClose, onSecret }: { open: boolean; onClose: () => void; onSecret: (s: string) => void }) {
-  const [key, setKey] = useState("");
-  const [url, setUrl] = useState("");
-  const add = useAction(async () => unwrap(await api.POST("/admin-api/plugins/connections", { body: { key, base_url: url, secret: "" } })),
-    { invalidate: [["plugins"]], done: (r) => { onClose(); setKey(""); setUrl(""); onSecret(r.secret); } });
-  return (
-    <Dialog open={open} onClose={onClose} title="Connect a project over HTTP"
-      footer={<><Button onClick={onClose}>Cancel</Button><Button variant="primary" disabled={!key || !url} loading={add.busy} onClick={() => add.run(undefined)}>Connect</Button></>}>
-      {add.notice && <div className="mb-3"><Alert tone={add.notice.tone}>{add.notice.text}</Alert></div>}
-      <div className="grid gap-3">
-        <Field label="Key" hint="Short, lowercase: it names the project's tools (key_tool) and events (key.event)."><Input value={key} maxLength={24} placeholder="shop" onChange={(e) => setKey(e.target.value.toLowerCase())} /></Field>
-        <Field label="The project's address for Control Tower" hint="Where it answers /manifest, /tools/…, /actions/… and /metrics."><Input value={url} placeholder="https://shop.example.com/control-tower" onChange={(e) => setUrl(e.target.value)} /></Field>
-      </div>
-      <p className="mt-3 text-xs text-muted">Next: Control Tower shows a shared secret once. Put it into the project's settings, then press Fetch on the new card.</p>
-    </Dialog>
-  );
-}
-
 export function PluginsPage({ owner }: { owner: boolean }) {
   const { data, error } = usePlugins();
-  const [connect, setConnect] = useState(false);
   const [shown, setShown] = useState("");
   if (error) return <Alert>{error.message}</Alert>;
   if (!data) return null;
   return (
     <>
       <PageTitle title="Plugins" description="Your projects, connected: what they give the agents to read, what agents may propose to do in them (only after your clearance), their numbers and their starter agents. Each starts off."
-        actions={owner && <Button variant="primary" onClick={() => setConnect(true)}><Plug className="h-3.5 w-3.5" aria-hidden />Connect a project</Button>} />
+        actions={owner && <Link to="/plugins/connect"><Button variant="primary"><Plug className="h-3.5 w-3.5" aria-hidden />Connect your project</Button></Link>} />
       {data.problems.map((p) => (
         <div key={p.key} className="mb-3"><Alert tone="warning"><span className="font-semibold">{p.key}</span> ({p.source === "http" ? p.location : `plugins/${p.key}`}): {p.error}
-          {p.source === "http" && owner && <FetchButton keyName={p.key} />}</Alert></div>
+          {p.source === "http" && owner && <><Link to={`/plugins/connect/${p.key}`} className="ml-2"><Button size="sm" variant="primary">Continue setup</Button></Link><FetchButton keyName={p.key} /></>}</Alert></div>
       ))}
       {data.plugins.length === 0 && data.problems.length === 0 && (
-        <Card><Empty>No plugins yet. Put a Python plugin in the server's plugins/ folder and restart, or connect a project over HTTP.</Empty></Card>
+        <Card><Empty>No plugins yet. Press Connect your project: it walks you through it.</Empty></Card>
       )}
       {data.plugins.map((p) => <PluginCard key={p.key} plugin={p} owner={owner} onSecret={setShown} />)}
       <p className="mt-4 text-xs text-subtle">Projects send events to {data.events_address}, signed with their shared secret.</p>
-      <ConnectDialog open={connect} onClose={() => setConnect(false)} onSecret={setShown} />
       <SecretShown secret={shown} onClose={() => setShown("")} />
     </>
   );

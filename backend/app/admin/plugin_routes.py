@@ -6,9 +6,12 @@ except a new shared secret once, when it is made."""
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from ..core import crypto
@@ -74,6 +77,18 @@ class PluginsOut(BaseModel):
     plugins: list[PluginOut]
     problems: list[PluginProblemOut]
     events_address: str
+    # This install's own address, for a project's CONTROL_TOWER_URL.
+    control_tower_url: str = ""
+    # HTTP connections and where each points (also those still waiting for their first check).
+    connections: dict[str, str] = Field(default_factory=dict)
+
+
+class CheckOut(BaseModel):
+    ok: bool
+    step: str
+    message: str
+    hint: str
+    plugins: PluginsOut
 
 
 class PluginChangeIn(BaseModel):
@@ -149,7 +164,8 @@ def _list() -> PluginsOut:
     problems += [PluginProblemOut(key=k, source="http", location=str(c.get("base_url")), error=str(c.get("error") or "Waiting for the project's manifest: press Fetch."))
                  for k, c in sorted(conns.items()) if not c.get("manifest") and k not in plugins.FAILED]
     base = (settings().admin_public_base_url or settings().public_base_url or "").rstrip("/")
-    return PluginsOut(plugins=[_out(k) for k in sorted(plugins.LOADED)], problems=problems, events_address=f"{base}/plugin-api/v1/<plugin>/events")
+    return PluginsOut(plugins=[_out(k) for k in sorted(plugins.LOADED)], problems=problems, events_address=f"{base}/plugin-api/v1/<plugin>/events",
+                      control_tower_url=base, connections={k: str(c.get("base_url") or "") for k, c in sorted(conns.items())})
 
 
 def _loaded(key: str) -> plugins.Loaded:
@@ -250,6 +266,55 @@ def fetch_manifest(key: str, ctx: OwnerAdmin, session: AdminDb) -> PluginsOut:
     record(session, ctx.admin, "plugin.manifest_fetched", target_type="plugin", target_id=key, ip=ctx.ip,
            metadata={"version": manifest.get("version"), "tools": len(manifest.get("tools") or []), "actions": len(manifest.get("actions") or [])})
     return _list()
+
+
+@router.post("/connections/{key}/check", response_model=CheckOut)
+def check_connection(key: str, ctx: OwnerAdmin, session: AdminDb) -> CheckOut:
+    """Ask the project the way Control Tower will, and say in plain words what is wrong; when all is right, take what it offers."""
+    conns = {k: dict(v) for k, v in plugins.connections().items()}
+    if key not in conns:
+        raise NotFound("No such connection.", code="PLUGIN_NOT_FOUND")
+    conn = conns[key]
+    found = connector.diagnose(key, conn["base_url"], plugins.secret(key))
+    if found.ok and found.manifest is not None:
+        conn.update(manifest=found.manifest, error="")
+        plugins.save_connections(session, conns)
+        if key in plugins.FAILED and key not in plugins.LOADED:
+            found = connector.Diagnosis(False, "manifest", plugins.FAILED[key], "Give this sentence to your coding agent.")
+    else:
+        conn["error"] = found.message
+        plugins.save_connections(session, conns)
+    record(session, ctx.admin, "plugin.connection_checked", target_type="plugin", target_id=key, ip=ctx.ip,
+           result="ok" if found.ok else "failed", metadata={"step": found.step})
+    return CheckOut(ok=found.ok, step=found.step, message=found.message, hint=found.hint, plugins=_list())
+
+
+def _kit_file(name: str) -> Path:
+    """The connection kit: docs/CONNECT-A-PROJECT.md and tools/check_connection.py, in the repository or the image."""
+    root = Path(__file__).resolve().parents[3]
+    path = root / name
+    if not path.is_file():
+        raise NotFound("The connection kit is not part of this install.", code="KIT_MISSING")
+    return path
+
+
+@router.get("/connect-kit/brief", response_class=PlainTextResponse)
+def connect_brief(_ctx: OwnerAdmin, key: str = Query(default="myproject", max_length=24), base_url: str = Query(default="", max_length=500)) -> PlainTextResponse:
+    """The brief for the project's coding agent, with this connection's details on top."""
+    from ..config import settings
+
+    tower = (settings().admin_public_base_url or settings().public_base_url or "").rstrip("/")
+    head = (f"<!-- This connection: CONTROL_TOWER_KEY={key}  CONTROL_TOWER_URL={tower}  "
+            f"routes under: {urlparse(base_url).path or '/control-tower'}  (the shared secret is NOT in this file) -->\n\n")
+    body = _kit_file("docs/CONNECT-A-PROJECT.md").read_text(encoding="utf-8")
+    return PlainTextResponse(head + body, media_type="text/markdown; charset=utf-8",
+                             headers={"Content-Disposition": 'attachment; filename="CONTROL-TOWER.md"'})
+
+
+@router.get("/connect-kit/check-script", response_class=PlainTextResponse)
+def connect_check_script(_ctx: OwnerAdmin) -> PlainTextResponse:
+    return PlainTextResponse(_kit_file("tools/check_connection.py").read_text(encoding="utf-8"), media_type="text/x-python; charset=utf-8",
+                             headers={"Content-Disposition": 'attachment; filename="check_connection.py"'})
 
 
 @router.delete("/connections/{key}", response_model=PluginsOut)

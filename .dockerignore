@@ -29,6 +29,8 @@ docs
 !README.md
 # The admin's own documentation is part of the app (Admin → Docs, and what Nia reads).
 !backend/app/admin_docs/*.md
+# The connection kit (Plugins → Connect your project).
+!docs/CONNECT-A-PROJECT.md
 
 # Test and tooling artefacts
 .playwright

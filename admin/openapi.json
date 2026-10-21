@@ -1848,6 +1848,38 @@
         "title": "Character",
         "type": "object"
       },
+      "CheckOut": {
+        "properties": {
+          "hint": {
+            "title": "Hint",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "plugins": {
+            "$ref": "#/components/schemas/PluginsOut"
+          },
+          "step": {
+            "title": "Step",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "step",
+          "message",
+          "hint",
+          "plugins"
+        ],
+        "title": "CheckOut",
+        "type": "object"
+      },
       "CodeIn": {
         "properties": {
           "code": {
@@ -6822,6 +6854,18 @@
       },
       "PluginsOut": {
         "properties": {
+          "connections": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Connections",
+            "type": "object"
+          },
+          "control_tower_url": {
+            "default": "",
+            "title": "Control Tower Url",
+            "type": "string"
+          },
           "events_address": {
             "title": "Events Address",
             "type": "string"
@@ -10068,7 +10112,7 @@
     }
   },
   "info": {
-    "title": "Control Tower API",
+    "title": "Dee Empire API",
     "version": "1.0.0"
   },
   "openapi": "3.1.0",
@@ -16867,6 +16911,83 @@
         ]
       }
     },
+    "/admin-api/plugins/connect-kit/brief": {
+      "get": {
+        "description": "The brief for the project's coding agent, with this connection's details on top.",
+        "operationId": "connect_brief_admin_api_plugins_connect_kit_brief_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "required": false,
+            "schema": {
+              "default": "myproject",
+              "maxLength": 24,
+              "title": "Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "base_url",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 500,
+              "title": "Base Url",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Connect Brief",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/connect-kit/check-script": {
+      "get": {
+        "operationId": "connect_check_script_admin_api_plugins_connect_kit_check_script_get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Connect Check Script",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
     "/admin-api/plugins/connections": {
       "post": {
         "operationId": "add_connection_admin_api_plugins_connections_post",
@@ -16945,6 +17066,49 @@
           }
         },
         "summary": "Remove Connection",
+        "tags": [
+          "admin-plugins"
+        ]
+      }
+    },
+    "/admin-api/plugins/connections/{key}/check": {
+      "post": {
+        "description": "Ask the project the way Control Tower will, and say in plain words what is wrong; when all is right, take what it offers.",
+        "operationId": "check_connection_admin_api_plugins_connections__key__check_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check Connection",
         "tags": [
           "admin-plugins"
         ]

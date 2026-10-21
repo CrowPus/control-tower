@@ -291,3 +291,45 @@ def test_the_owner_switches_a_plugin_on_only_with_its_settings(admin: Any) -> No
     assert {o["email"] for o in view["result"]["orders"]} == {plugins.HIDDEN}
     assert admin.post("/admin-api/plugins/hello_shop/collect").json() == {"problems": {"hello_shop": []}}
     assert admin.post("/admin-api/plugins/nothing/collect").status_code == 404
+
+
+def test_check_the_connection_says_in_plain_words_what_is_wrong(admin: Any) -> None:  # noqa: F811
+    project = FakeProject()
+    secret = admin.post("/admin-api/plugins/connections", json={"key": "crm", "base_url": "https://crm.example/ct"}).json()["secret"]
+
+    def check() -> dict[str, Any]:
+        out = admin.post("/admin-api/plugins/connections/crm/check")
+        assert out.status_code == 200, out.text
+        return out.json()
+
+    connector.TRANSPORT = httpx.MockTransport(lambda r: (_ for _ in ()).throw(httpx.ConnectError("no route")))
+    assert check()["step"] == "reach"
+    connector.TRANSPORT = httpx.MockTransport(lambda r: httpx.Response(404, json={"error": "not found"}))
+    assert check()["step"] == "routes"
+    connector.TRANSPORT = httpx.MockTransport(lambda r: httpx.Response(301, headers={"location": "https://www.crm.example/ct/manifest"}))
+    redirected = check()
+    assert redirected["step"] == "address" and "www.crm.example" in redirected["message"]
+    connector.TRANSPORT = httpx.MockTransport(lambda r: httpx.Response(200, json=FakeProject.MANIFEST))
+    assert check()["step"] == "unsigned", "a project that answers anyone is not accepted"
+    project.secret = "a-different-secret-of-enough-length-0123"  # noqa: S105 - a made-up test value
+    connector.TRANSPORT = httpx.MockTransport(project)
+    wrong = check()
+    assert wrong["step"] == "signature" and "secret" in wrong["message"] and wrong["hint"]
+    project.secret = secret
+    project.MANIFEST = {**FakeProject.MANIFEST, "key": "other"}
+    bad = check()
+    assert bad["step"] == "manifest" and "'other'" in bad["message"]
+    project.MANIFEST = FakeProject.MANIFEST
+    good = check()
+    assert good["ok"] and good["step"] == "ok" and any(p["key"] == "crm" for p in good["plugins"]["plugins"])
+    assert good["plugins"]["connections"] == {"crm": "https://crm.example/ct"} and good["plugins"]["control_tower_url"] is not None
+    assert "plugin.connection_checked" in admin.get("/admin-api/audit").text
+
+
+def test_the_connection_kit_is_handed_out_with_the_connections_details(admin: Any) -> None:  # noqa: F811
+    brief = admin.get("/admin-api/plugins/connect-kit/brief", params={"key": "shop", "base_url": "https://shop.example/control-tower"})
+    assert brief.status_code == 200 and "attachment" in brief.headers["content-disposition"]
+    assert "CONTROL_TOWER_KEY=shop" in brief.text and "routes under: /control-tower" in brief.text
+    assert "## Ground rules" in brief.text and "X-Control-Tower-Signature" in brief.text
+    script = admin.get("/admin-api/plugins/connect-kit/check-script")
+    assert script.status_code == 200 and "def main()" in script.text
