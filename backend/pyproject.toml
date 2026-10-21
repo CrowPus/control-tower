@@ -33,7 +33,7 @@ mysql = ["pymysql[rsa]>=1.1,<2"]
 dev = [
     "pytest>=8,<10",
     "ruff>=0.11,<1",
-    "mypy>=1.15,<2",
+    "mypy>=1.15,<3",
     "pytest-asyncio>=0.24,<2",
     "aiosmtpd>=1.4,<2",
     "types-python-dateutil>=2.9.0.20260807",
