@@ -1,0 +1,13 @@
+# The secret scan (CI → Secrets and vulnerabilities) uses gitleaks' full default rules. Allowed here: only the made-up
+# values the tests use — keys containing 0123456789 and the tests' "…-passphrase-2026" passwords. A real key anywhere,
+# tests included, is still found.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Made-up test credentials"
+regexTarget = "match"
+regexes = [
+  '''0123456789''',
+  '''-passphrase-(long-)?2026''',
+]

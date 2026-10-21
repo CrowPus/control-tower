@@ -1,0 +1,28 @@
+name: Feature request
+description: Something Control Tower should do.
+labels: ["enhancement", "needs triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today? The problem matters more than the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+      description: How you imagine it working. Screenshots or sketches welcome.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: The rules
+      description: Control Tower's agents only propose and the owner decides (see the README's "Safe by design").
+      options:
+        - label: My idea keeps that — or I explain above why it should not.
+          required: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question, idea or "how do I…?"
+    url: https://github.com/CrowPus/control-tower/discussions
+    about: Ask in Discussions — answers stay findable for the next person.
+  - name: Security vulnerability
+    url: https://github.com/CrowPus/control-tower/security/advisories/new
+    about: Report vulnerabilities privately — never in a public issue.

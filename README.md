@@ -13,6 +13,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/CrowPus/control-tower/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/CrowPus/control-tower/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-33019d"></a>
   <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-yes-08b97a">
   <img alt="Docker" src="https://img.shields.io/badge/runs%20on-Docker-2496ed">
@@ -232,10 +233,16 @@ what was built: [docs/PLAN.md](docs/PLAN.md), [docs/BUILD_LOG.md](docs/BUILD_LOG
 | [**Plugins**](docs/PLUGINS.md) | The full reference: tools, actions, numbers, events, signing. |
 | **In the admin** | *Docs* explains every page — and Nia answers questions about any of it. |
 
+## Contributing
+
+Contributions are welcome — bug fixes, plugins for the services you use, docs, translations. Start with
+[CONTRIBUTING.md](CONTRIBUTING.md); questions and ideas go to [Discussions](https://github.com/CrowPus/control-tower/discussions),
+vulnerabilities to [SECURITY.md](SECURITY.md). Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
 Open source under the [GNU AGPL-3.0](LICENSE). Run it for yourself and your business; if you offer a modified version
 to others over a network, share your source — or ask for a commercial license: **support@dee-empire.com**.
-Plain-language summary: [LICENSING.md](LICENSING.md). Contributions are welcome under the [CLA](CLA.md).
+Plain-language summary: [LICENSING.md](LICENSING.md). Contributions are accepted under the [CLA](CLA.md).
 
 <p align="center"><sub>Made by <a href="https://dee-empire.com">Dee Empire</a>.</sub></p>

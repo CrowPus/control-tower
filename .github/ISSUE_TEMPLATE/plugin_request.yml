@@ -1,0 +1,33 @@
+name: Connect a product or service
+description: Ask for a ready-made plugin (like Stripe), or get help connecting your own product.
+labels: ["plugin", "needs triage"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is it about?
+      options:
+        - A ready-made plugin for a service (Shopify, HubSpot, Plausible …)
+        - Help connecting my own product
+        - A problem with the plugin interface or the HTTP protocol
+    validations:
+      required: true
+  - type: input
+    id: service
+    attributes:
+      label: The service or product
+      placeholder: "Shopify / my Next.js app / …"
+    validations:
+      required: true
+  - type: textarea
+    id: see
+    attributes:
+      label: What should agents see — and suggest?
+      description: Read-only lists and numbers first; actions only where they clearly help.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried
+      description: If you used Plugins → Connect your project, paste what Check the connection said.

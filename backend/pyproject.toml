@@ -19,7 +19,7 @@ dependencies = [
   "tzdata>=2026.4",
   "redis>=5,<7",
   "segno>=1.6,<2",
-  "pillow>=11,<13",
+  "pillow>=13,<14",
   "reportlab>=4.2,<5",
   # The video studio joins scenes with ffmpeg; this wheel brings its own ffmpeg binary.
   "imageio-ffmpeg>=0.5,<1",

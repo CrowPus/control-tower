@@ -1,6 +1,6 @@
 # Working in this repository
 
-Notes for coding agents. Read [docs/PLAN.md](docs/PLAN.md) (what Control Tower is and the build order) and
+Notes for coding agents (people: [CONTRIBUTING.md](CONTRIBUTING.md)). Read [docs/PLAN.md](docs/PLAN.md) (what Control Tower is and the build order) and
 [docs/BUILD_LOG.md](docs/BUILD_LOG.md) (what is built, how to build and test) before anything else, and add an entry to
 the build log for every finished step.
 

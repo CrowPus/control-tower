@@ -1,0 +1,60 @@
+name: Bug report
+description: Something does not work as the docs say it should.
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please leave out keys, passwords, e-mail addresses and your customers' data — logs included.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+      placeholder: "I pressed Check the connection on Plugins → Connect your project; it said … but I expected …"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release (e.g. v0.1.0) or commit (`git rev-parse --short HEAD`).
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Install, update or backup
+        - Admin (a page in the browser)
+        - Agents, Clearance or Nia
+        - A plugin or project connection
+        - The AI provider
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: AI provider (if it involves agents or Nia)
+      options:
+        - Not relevant
+        - Google Gemini
+        - Anthropic Claude
+        - OpenAI or a compatible service
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "`docker compose logs --tail 100 app worker` around the time it happened — with secrets removed."
+      render: text

@@ -1,0 +1,16 @@
+# Every pull request asks the maintainers for a review. This is a review routing table, not a permission list.
+*                                         @CrowPus
+
+# Where a mistake is expensive: never reviewed by accident.
+/backend/app/services/team/approvals.py   @CrowPus
+/backend/app/services/team/runner.py      @CrowPus
+/backend/app/services/plugins/            @CrowPus
+/backend/app/plugin_api.py                @CrowPus
+/backend/app/admin/auth.py                @CrowPus
+/backend/app/core/crypto.py               @CrowPus
+/backend/migrations/                      @CrowPus
+/.github/workflows/                       @CrowPus
+/install.sh                               @CrowPus
+/scripts/                                 @CrowPus
+/SECURITY.md                              @CrowPus
+/CLA.md                                   @CrowPus

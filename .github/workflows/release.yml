@@ -1,0 +1,114 @@
+name: Release
+
+# Tag a commit and this releases it:
+#
+#   git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
+#
+# It runs every check on the tagged commit, publishes the Docker image to the GitHub Container Registry
+# (ghcr.io/crowpus/control-tower:<version> and :latest) and creates the GitHub release with that version's section of
+# CHANGELOG.md as its notes. A tag whose commit does not pass is not released.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing tag to release
+        required: true
+
+env:
+  UV_VERSION: "0.12.16"
+  NODE_VERSION: "22"
+
+jobs:
+  verify:
+    name: Verify the tagged commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tower
+          POSTGRES_PASSWORD: tower
+          POSTGRES_DB: tower
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tower -d tower"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Backend
+        working-directory: backend
+        run: |
+          uv sync --locked --all-extras
+          uv run ruff check app tests ../tools ../plugins ../examples
+          uv run mypy app
+          uv run pytest -q
+          TEST_DATABASE_URL=postgresql://tower:tower@localhost:5432/tower uv run pytest -q
+      - name: Admin
+        run: npm ci && npm run build
+      - name: The changelog has this version
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          grep -q "^## \[${TAG#v}\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no '## [${TAG#v}]' section."; exit 1; }
+
+  publish:
+    name: Image and release
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: docker/setup-buildx-action@v4
+      - name: Sign in to the GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Image name
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - name: Build and publish the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ env.TAG }}
+            ${{ steps.image.outputs.name }}:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=AGPL-3.0-only
+            org.opencontainers.image.version=${{ env.TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Release notes from the changelog
+        run: |
+          awk -v v="${TAG#v}" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on && /^\[[^]]+\]: / { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          printf '\n---\n**Docker image:** `docker pull %s:%s`\n' "ghcr.io/${GITHUB_REPOSITORY,,}" "$TAG" >> notes.md
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file notes.md --verify-tag
