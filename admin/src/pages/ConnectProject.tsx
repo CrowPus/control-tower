@@ -154,6 +154,9 @@ export function ConnectProjectPage() {
 
       {kind === "app" && (created || resume) && (
         <>
+          <Step n={2} title="Name it and say where it runs" done>
+            <p className="text-[13px] text-muted">Key <span className="font-mono text-fg">{connKey}</span> · Control Tower will call <span className="break-all font-mono text-fg">{base || "—"}</span></p>
+          </Step>
           <Step n={3} title="Your project's settings" done={false}>
             {created?.secret ? (
               <>
