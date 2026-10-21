@@ -82,13 +82,9 @@ mailboxes, a **marketing studio** (pictures and short videos), **Trust** reviews
 
 ```mermaid
 flowchart LR
-    P["🛍️ Your product<br/>app · shop · website"] -- "numbers, lists, events" --> A
-    subgraph CT ["Control Tower — on your server"]
-        A["🤖 Agents<br/>one job each"] -- "suggestions" --> C["📥 Clearance"]
-    end
-    C -- "you approve" --> X["✅ Carried out<br/>once, and logged"]
-    X --> P
-    Y(("👤 You")) -. "decide" .-> C
+    P["🛍️ Your product"] -- "numbers · lists · events" --> A["🤖 Agents<br/>one job each"]
+    A -- "suggest" --> C["📥 Clearance"]
+    C -- "👤 you approve" --> X["✅ Done in your product<br/>once, and logged"]
 ```
 
 1. **Connect your product.** A small, signed connection lets agents read what you choose — sign-ups, orders, failed
