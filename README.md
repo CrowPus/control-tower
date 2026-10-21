@@ -51,18 +51,30 @@ follow-ups. Control Tower gives you a team for that, without handing your busine
 
 <table>
   <tr>
+    <td colspan="2" valign="top">
+      <img src="docs/images/clearance.png" alt="Clearance: suggestions from the agents Scout and Research Lead, each with why, the expected effect, the evidence and Approve, Edit or Reject">
+      <p><b>Clearance</b> — every suggestion waits for you, with why the agent makes it, what it expects, and the evidence. Approve, edit, or reject and say why: the agent learns from it. <sub>(Epliv, where it is called Approvals: 15 waiting, 1,048 done.)</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/images/team.png" alt="Team: the team switch, daily and monthly AI budgets, and each agent by department with its schedule and cost">
+      <p><b>Your team</b> — each agent with its job, its schedule and what it cost today and this week, under a daily and monthly budget you set. One switch stops them all. <sub>(Epliv's team.)</sub></p>
+    </td>
     <td width="50%" valign="top">
       <img src="docs/images/dashboard.png" alt="Insights: the north-star number, agent runs, proposals, AI cost and server errors over 30 days">
       <p><b>Insights</b> — the few numbers that tell you whether your agents are working: what they did, what you cleared, what it cost. Your product's own numbers sit next to them.</p>
     </td>
-    <td width="50%" valign="top">
+  </tr>
+  <tr>
+    <td colspan="2" valign="top">
       <img src="docs/images/brain.jpg" alt="The Brain: a graph of everything the team knows — agents, departments, handoffs, proposals, notes and memories">
-      <p><b>The Brain</b> — everything the team knows and did, as one web you can search and ask. Every agent reads it before it works. <sub>(Epliv's brain, after a few weeks.)</sub></p>
+      <p><b>The Brain</b> — everything the team knows and did, as one web you can search and ask. Every agent reads it before it works. <sub>(Epliv's brain, after a few weeks: 1,726 things and 2,314 links.)</sub></p>
     </td>
   </tr>
 </table>
 
-Also inside: **Clearance**, **Nia** by text or voice, team **chat** with any agent, a **mail client** for the agents'
+Also inside: **Nia** by text or voice, team **chat** with any agent, a **mail client** for the agents'
 mailboxes, a **marketing studio** (pictures and short videos), **Trust** reviews of the agents' work, and a
 **gateway** (MCP) so outside agents like Claude Code or ChatGPT can join your team under the same rules.
 
