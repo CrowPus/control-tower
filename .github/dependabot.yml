@@ -27,6 +27,12 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      # Node: long-term-support majors only, chosen by a maintainer. Python: the version pyproject.toml requires.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
 
   - package-ecosystem: github-actions
     directory: "/"
