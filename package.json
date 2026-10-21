@@ -41,7 +41,7 @@
     "openapi-typescript": "^7.0.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.4.5"
   },
   "overrides": {
     "force-graph": "1.51.4",
